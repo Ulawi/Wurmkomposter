@@ -1,0 +1,90 @@
+{
+  "ruleChain": {
+    "name": "Evaluate Worm Condition",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "additionalInfo": null
+  },
+  "metadata": {
+    "version": 6,
+    "firstNodeIndex": 0,
+    "nodes": [
+      {
+        "type": "org.thingsboard.rule.engine.metadata.TbGetAttributesNode",
+        "name": "Get last_feeding_time",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "clientAttributeNames": [],
+          "sharedAttributeNames": [
+            "last_feeding_time"
+          ],
+          "serverAttributeNames": [],
+          "fetchTo": "METADATA"
+        },
+        "additionalInfo": {
+          "layoutX": 315,
+          "layoutY": 152
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgAttributesNode",
+        "name": "save worm_condition",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 3,
+        "configuration": {
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          },
+          "scope": "SHARED_SCOPE",
+          "notifyDevice": false,
+          "sendAttributesUpdatedNotification": false,
+          "updateAttributesOnlyOnValueChange": false
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 915,
+          "layoutY": 152
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "eval_wormconditions",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var temperature = parseFloat(msg.temperature || 0);\nvar moisture = parseFloat(msg.humidity || 0);\nvar methan = parseFloat(msg.gas || 0);\nvar lastFeedingTs = metadata['ts_last_feeding_time'] ? parseInt(metadata['ts_last_feeding_time']) : 0;\nvar now = Date.now();\n\n// Time since last feeding in hours\nvar hoursSinceFeeding = (now - lastFeedingTs) / (1000 * 60 * 60);\n\n// Collect all active conditions\nvar conditions = [];\n\nif (moisture < 60) {\n    conditions.push(\"too dry\");\n}\nif (moisture > 80) {\n    conditions.push(\"too wet\");\n}\nif (temperature < 15 || temperature > 25) {\n    conditions.push(\"temperature stress\");\n}\n\nif (hoursSinceFeeding > 72) {\n    conditions.push(\"hungry\");\n}\n\nif (conditions.length === 0) {\n    conditions.push(\"happy\");\n}\n\n// Store result\nmsg.worm_condition = conditions.join(\", \");\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};",
+          "tbelScript": ""
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 601,
+          "layoutY": 152
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 2,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 1,
+        "type": "Success"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}
