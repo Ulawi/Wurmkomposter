@@ -90,23 +90,35 @@ Dieser Schritt erklärt, wie die Sensoren mit dem XIAO verbunden werden. Da wir 
    
    <img width="549" height="227" alt="image" src="https://github.com/user-attachments/assets/f64be7ef-2ff2-40fc-a936-27b2022a1274" />
 
-   Der XIAO EPS32-C3 wird mit einer Antenne ausgeliefert, die den Wlan-Empfang verbessert. Da wir die Sensordaten über Wlan an den Datenspeicher-Baustein schicken wollen, schrauben wir diese Antenne an. Hier ist Fingerfertigkeit gefragt, Stecker und Buchse sind ganz schön klein.   
+   Der XIAO EPS32-C3 wird mit einer Antenne ausgeliefert, die den Wlan-Empfang verbessert. Da wir die Sensordaten über Wlan an den Datenspeicher-Baustein schicken wollen, schrauben wir diese Antenne an. Hier ist Fingerfertigkeit gefragt, Stecker und Buchse sind ganz schön klein.
+
+   https://github.com/user-attachments/assets/e37c7382-4a54-47b7-97a3-c36010150af5
+
+
+
 3. Xiao auf die Base stecken:
    
-   Stecke den XAIO so auf die Base, dass der USB-Anschluss nach außen zeigt, wie auch oben im Pin-Out Diagramm zu sehen. 
-3. Bodenfeuchtesensorsensor anschließen:
+   Stecke den XAIO so auf die Base, dass der USB-Anschluss nach außen zeigt, wie auch oben im Pin-Out Diagramm zu sehen.
+   
+   
+
+  https://github.com/user-attachments/assets/5705ae1e-f625-4277-b91f-1344c1377df1
+
+
+5. Bodenfeuchtesensorsensor anschließen:
 
    Steckt den Bodenfeuchtesensor auf den Steckplatz A0 (siehe Diagramm oben)
 
    <img width="75%" alt="Bodenfeuchtesensor-angeschlossan-an-Grovebase" src="https://github.com/user-attachments/assets/bfdd70e9-4260-42ef-982a-158dd37adba7" />
 
-4. Gassensor anschließen:
+
+6. Gassensor anschließen:
 
    Der Gassensor wird auf Steckplatz A1 angeschlossen. 
 
    <img width="75%" alt="Gassensor-angeschlossen-an-Grovebase" src="https://github.com/user-attachments/assets/c4998d43-1ba1-42c9-b5ab-45a42366c0da" />
 
-5. Temperatursensor anschließen:
+7. Temperatursensor anschließen:
 
    Der Temperatursensor wird über I2C ausgelesen, und in die entsprechende Buchse gesteckt. Im Pin-Out-Diagramm ist sie mit A5 D5 I2C beschriftet.
 
