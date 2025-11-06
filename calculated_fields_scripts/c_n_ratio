@@ -1,0 +1,36 @@
+{
+  "type": "SCRIPT",
+  "name": "c/n ratio",
+  "debugSettings": {
+    "failuresEnabled": true,
+    "allEnabled": false,
+    "allEnabledUntil": 1762368725685
+  },
+  "configurationVersion": 0,
+  "configuration": {
+    "type": "SCRIPT",
+    "arguments": {
+      "amount_cups": {
+        "refEntityKey": {
+          "key": "amount_cups",
+          "type": "TS_ROLLING"
+        },
+        "limit": 100,
+        "timeWindow": 900000
+      },
+      "food_type": {
+        "refEntityKey": {
+          "key": "food_type",
+          "type": "TS_ROLLING"
+        },
+        "limit": 20,
+        "timeWindow": 900000
+      }
+    },
+    "expression": "/**\r\n * Calculate overall C/N ratio of recent feedings based on the C/N ratio of each material.\r\n * Sources for calculation:\r\n * https://cwmi.css.cornell.edu/chapter3.pdf#:~:text=Once%20you%20have%20the%20percent,of%20material%20n\r\n */\r\n\r\n\r\n// Material data (dry basis): approximate C/N ratio, moisture (%), and bulk density (g per cup)\r\n// Sources: Sustainability 2023, 15(7), 6191; https://doi.org/10.3390/su15076191 and https://cwmi.css.cornell.edu/AppendixATable1OFCH.pdf#:~:text=Garbage%20%28food%20waste%29%20Typical%201.9,20\r\n\r\n//assuming one cup ==250ml\r\nvar ppcy_to_gpml = 1685;\r\n\r\nvar MATERIAL_DATA = {\r\n    //\"fruit_waste\": {\r\n    \"1.0\": {\r\n        cn: 40,\r\n        moisture: 80,\r\n        density_g_per_cup: 120\r\n    },\r\n    //\"vegetable_scraps\": {\r\n    \"2.0\": {\r\n        cn: 13,\r\n        moisture: 85,\r\n        density_g_per_cup: 150\r\n    },\r\n    //\"coffee_grounds\": {\r\n    \"3.0\": {\r\n        cn: 20,\r\n        moisture: 60,\r\n        density_g_per_cup: 90\r\n    },\r\n    //\"bread\": {\r\n    \"4.0\": {\r\n        cn: 5,\r\n        moisture: 35,\r\n        density_g_per_cup: 80\r\n    },\r\n    //\"paper\": {\r\n    \"5.0\": {\r\n        cn: 150,\r\n        moisture: 18,\r\n        density_g_per_cup: 40\r\n    },\r\n    //\"cardboard\": {\r\n    \"6.0\": {\r\n        cn: 563,\r\n        moisture: 8,\r\n        density_g_per_cup: 38\r\n    },\r\n    //\"grass_clippings\": {\r\n    \"7.0\": {\r\n        cn: 17,\r\n        moisture: 82,\r\n        density_g_per_cup: 60\r\n    },\r\n    //\"leaves\": {\r\n    \"8.0\": {\r\n        cn: 54,\r\n        moisture: 38,\r\n        density_g_per_cup: 60\r\n    },\r\n    //\"shrub_trimmings\": {\r\n    \"9.0\": {\r\n        cn: 53,\r\n        moisture: 15,\r\n        density_g_per_cup: 65\r\n    },\r\n};\r\n\r\nvar amounts = [];\r\nvar materials = [];\r\n\r\n// extract data from TBEL rolling inputs\r\nif (ctx != null && ctx.args != null) {\r\n    if (ctx.args.amount_cups != null && ctx.args.amount_cups.values != null) {\r\n        for (var i = 0; i < ctx.args.amount_cups.values.size(); i++) {\r\n            amounts.add(ctx.args.amount_cups.values.get(i).value);\r\n        }\r\n    }\r\n    if (ctx.args.food_type != null && ctx.args.food_type.values != null) {\r\n        for (var j = 0; j < ctx.args.food_type.values.size(); j++) {\r\n            materials.add(ctx.args.food_type.values.get(j).value);\r\n        }\r\n    }\r\n}\r\n\r\n// if data mismatch, return null\r\nif (amounts.size() == 0 || materials.size() == 0) {\r\n    return {\r\n        \"cn_ratio\": null\r\n    };\r\n}\r\n\r\n// calculate weighted C/N ratio\r\nvar totalDryMass = 0.0;\r\nvar weightedSum = 0.0;\r\n\r\nfor (var k = 0; k < amounts.size(); k++) {\r\n    var cups = amounts.get(k);\r\n    var matName = (k < materials.size()) ? materials.get(k).toString : null;\r\n\r\n    if (matName != null && MATERIAL_DATA.containsKey(matName)) {\r\n        var mat = MATERIAL_DATA[matName];\r\n        var wetMass = cups * mat.density_g_per_cup;\r\n        var dryMass = wetMass * (1 - mat.moisture / 100.0);\r\n\r\n        weightedSum = weightedSum + (dryMass / mat.cn);\r\n        totalDryMass = totalDryMass + dryMass;\r\n    }\r\n}\r\n\r\nvar cnRatio = null;\r\nif (weightedSum > 0) {\r\n   cnRatio = totalDryMass / weightedSum;\r\n   cnRatio = Math.round(cnRatio * 10) / 10.0;\r\n}\r\n\r\nreturn {\r\n    \"cn_ratio\": cnRatio\r\n};",
+    "output": {
+      "name": "",
+      "type": "TIME_SERIES"
+    }
+  }
+}
