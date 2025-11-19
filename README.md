@@ -189,7 +189,7 @@ Für den Rest dieser Anleitung gehen wir davon aus, dass du dir einen Thingsboar
   - Gehe zu Devices und klicke auf das +-Symbol, um ein neues Gerät hinzuzufügen.
   - Gib einen Namen (z.B. "Wurmkomposter IoT") und als Typ "Wurmkomposter" ein. Klicke auf “Next: Credentials”
     
-  <img width="2560" height="1392" alt="deviceCredentials" src="https://github.com/user-attachments/assets/07db1d91-cc10-403f-b4ce-dbc254d372bb" />
+  <img width="80%"  alt="deviceCredentials" src="https://github.com/user-attachments/assets/07db1d91-cc10-403f-b4ce-dbc254d372bb" />
 
 
   - Wähle den <b>Access Token</b> als Anmeldetyp. <b>Kopiere den generierten Access Token</b> – den brauchst du später im Arduino-Code.
