@@ -189,7 +189,8 @@ Für den Rest dieser Anleitung gehen wir davon aus, dass du dir einen Thingsboar
   - Gehe zu Devices und klicke auf das +-Symbol, um ein neues Gerät hinzuzufügen.
   - Gib einen Namen (z.B. "Wurmkomposter IoT") und als Typ "Wurmkomposter" ein. Klicke auf “Next: Credentials”
     
-  <img width="80%" alt="image" src="https://github.com/Ulawi/Wurmkomposter/blob/main/wurmchat.json" />
+  <img width="2560" height="1392" alt="deviceCredentials" src="https://github.com/user-attachments/assets/07db1d91-cc10-403f-b4ce-dbc254d372bb" />
+
 
   - Wähle den <b>Access Token</b> als Anmeldetyp. <b>Kopiere den generierten Access Token</b> – den brauchst du später im Arduino-Code.
   - Kopiere die Device ID. Die brauchst du, um das Dashboard einzurichten.
@@ -199,7 +200,7 @@ Für den Rest dieser Anleitung gehen wir davon aus, dass du dir einen Thingsboar
 
 2. Dashboard erstellen:
    - Lade dir unser Dashboard aus diesem Repo herunter:
-   [Url](https://github.com/Ulawi/Wurmkomposter/blob/main/evaluate_worm_condition.json)
+   [Url]([https://github.com/Ulawi/Wurmkomposter/blob/main/evaluate_worm_condition.json])
    - Öffne die json Datei und ändere sie so ab, dass sie für dein neu erstelltes Device funktioniert:
      - Suche nach ““deviceID”: “hier-deine-device-id” und füge jeweils deine DeviceID ein (die sieht in etwa so aus:   abc1de23-11ab-11a0-ac90-a33a0132a123)
      - Gehe zu Dashboards und erstelle ein neues Dashboard, indem du auf + klickst, dann “Import dashboard” auswählst und die json-Datei auswählst, die du gerade geändert hast. 
