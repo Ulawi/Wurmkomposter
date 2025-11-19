@@ -224,7 +224,7 @@
             {
               "type": "device",
               "name": "",
-              "deviceId": "bbd7fe20-43bd-11f0-ac90-a33a0132a65a",
+              "deviceId": "hier-deine-device-id",
               "dataKeys": [
                 {
                   "name": "Temperatur",
@@ -395,7 +395,7 @@
             {
               "type": "device",
               "name": "",
-              "deviceId": "bbd7fe20-43bd-11f0-ac90-a33a0132a65a",
+              "deviceId": "hier-deine-device-id",
               "dataKeys": [
                 {
                   "name": "Bodenfeuchte",
@@ -735,7 +735,7 @@
             {
               "type": "device",
               "name": "",
-              "deviceId": "bbd7fe20-43bd-11f0-ac90-a33a0132a65a",
+              "deviceId": "hier-deine-device-id",
               "dataKeys": [
                 {
                   "name": "Gas",
@@ -906,7 +906,7 @@
             {
               "type": "device",
               "name": "",
-              "deviceId": "bbd7fe20-43bd-11f0-ac90-a33a0132a65a",
+              "deviceId": "hier-deine-device-id",
               "dataKeys": [
                 {
                   "name": "user-chat-input",
