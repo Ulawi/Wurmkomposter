@@ -189,7 +189,7 @@ Für den Rest dieser Anleitung gehen wir davon aus, dass du dir einen Thingsboar
   - Gehe zu Devices und klicke auf das +-Symbol, um ein neues Gerät hinzuzufügen.
   - Gib einen Namen (z.B. "Wurmkomposter IoT") und als Typ "Wurmkomposter" ein. Klicke auf “Next: Credentials”
     
-  <img width="80%" alt="image" src="https://github.com/user-attachments/assets/91408082-5fe7-4e35-9c47-0f2d18fb7943" />
+  <img width="80%" alt="image" src="https://github.com/Ulawi/Wurmkomposter/blob/main/wurmchat.json" />
 
   - Wähle den <b>Access Token</b> als Anmeldetyp. <b>Kopiere den generierten Access Token</b> – den brauchst du später im Arduino-Code.
   - Kopiere die Device ID. Die brauchst du, um das Dashboard einzurichten.
