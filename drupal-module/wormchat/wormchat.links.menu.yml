@@ -1,0 +1,5 @@
+wormchat.food_admin:
+  title: 'Worm Food Items'
+  description: 'Manage worm food items'
+  route_name: wormchat.food_list
+  parent: system.admin_config_system

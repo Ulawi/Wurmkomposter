@@ -1,0 +1,24 @@
+{
+    "id": "pumpkin",
+    "name": "Kürbis",
+    "color": "orange",
+    "category": "vegetable",
+    "moisture": "high",
+    "decomposition_speed": "fast",
+    "nutrient_profile": "Nitrogen-rich, produces quick heat",
+    "sensor_fingerprint": {
+        "smell": "",
+        "temperature_change": "",
+        "pH_effect": "",
+        "moisture_effect": ""
+    },
+    "user_guidance": {
+        "do": [
+            "Zerteile in kleine Stücke",
+            "Mit Pappier oder Karton mischen"
+        ],
+        "dont": [
+            "Als Ganzes verfüttern"
+        ]
+    }
+}

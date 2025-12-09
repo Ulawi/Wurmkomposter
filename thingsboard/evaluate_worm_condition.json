@@ -1,0 +1,142 @@
+{
+  "ruleChain": {
+    "name": "Evaluate Worm Condition",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "additionalInfo": null
+  },
+  "metadata": {
+    "version": 3,
+    "firstNodeIndex": 0,
+    "nodes": [
+      {
+        "type": "org.thingsboard.rule.engine.metadata.TbGetAttributesNode",
+        "name": "Get additional values",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "tellFailureIfAbsent": false,
+          "fetchTo": "DATA",
+          "clientAttributeNames": [],
+          "sharedAttributeNames": [
+            "last_feeding_time"
+          ],
+          "serverAttributeNames": [],
+          "latestTsKeyNames": [
+            "c_n_value"
+          ],
+          "getLatestValueWithTs": true
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 315,
+          "layoutY": 152
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "eval_wormconditions",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var temperature = parseFloat(msg.Temperatur || -1);\nvar moisture = parseFloat(msg.Bodenfeuchte || -1);\nvar methan = parseFloat(msg.Gas || 0);\nvar lastFeedingTs = msg.c_n_value.ts;\nvar c_n_value=msg.c_n_value.value;\nvar now = Date.now();\n\n// Time since last feeding in hours\nvar hoursSinceFeeding = (now - lastFeedingTs) / (1000 * 60 * 60);\n\n// Collect all active conditions\nvar conditions = [];\n\nif (moisture < 60 && moisture > -1) {\n    conditions.push(\"dry\");\n}\nif (moisture > 80) {\n    conditions.push(\"wet\");\n}\nif ( temperature > 25) {\n    conditions.push(\"hot\");\n}\n\nif (temperature < 15 ) {\n    conditions.push(\"cold\");\n}\n\nif (hoursSinceFeeding > 72) {\n    conditions.push(\"hungry\");\n}\n\nif (c_n_value < 9) {\n    conditions.push(\"cnLow\");\n}\n\nif (c_n_value > 30) {\n    conditions.push(\"cnHigh\");\n}\n\n//if (Gas ) { //TODO define gas threshold\n//    conditions.push(\"rotten\");\n//}\n\n\n\nif (conditions.length === 0) {\n    conditions.push(\"happy\");\n}\n\n// Store result\nvar worm_condition = conditions.join(\"_\");\n\n\nreturn[{msg: {worm_condition: worm_condition}, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"},\n    // Nachricht 2: Geht zum \"Save Attributes\" Node\n    {\n        msg: {worm_condition: worm_condition},\n        metadata: metadata,\n        msgType: \"POST_ATTRIBUTES_REQUEST\"\n    }];",
+          "tbelScript": ""
+        },
+        "additionalInfo": {
+          "description": "Calculating worm states from sensor readings ad feeding logs.",
+          "layoutX": 601,
+          "layoutY": 152
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode",
+        "name": "saveWormcondition",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          },
+          "defaultTTL": 0,
+          "useServerTs": true
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1289,
+          "layoutY": 152
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.filter.TbMsgTypeSwitchNode",
+        "name": "timeseries attribute split",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "version": 0
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 908,
+          "layoutY": 154
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgAttributesNode",
+        "name": "save worm_condition",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 3,
+        "configuration": {
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          },
+          "scope": "SHARED_SCOPE",
+          "notifyDevice": false,
+          "sendAttributesUpdatedNotification": false,
+          "updateAttributesOnlyOnValueChange": false
+        },
+        "additionalInfo": {
+          "description": "fallback for drupal read",
+          "layoutX": 1291,
+          "layoutY": 226
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 1,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 3,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 2,
+        "type": "Post telemetry"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 4,
+        "type": "Post attributes"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

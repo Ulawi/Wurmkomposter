@@ -1,0 +1,516 @@
+/* WRAPPER */
+.worm-feeding-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  min-height: 100vh;  /* ===== Use full viewport height ===== */
+}
+
+/* COLOR CATEGORIES ROW */
+.color-categories-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+}
+
+/* ===== COLOR CUSTOM PROPERTIES (set by JavaScript) ===== */
+/* These are defined dynamically in the inline script above */
+/* Fallback values are provided in data-* attributes in Twig */
+
+.color-category-btn {
+  /* ===== FIX: Use flexible sizing based on viewport =====  */
+  width: clamp(40px, 8vw, 60px);  /* ===== Min 40px, preferred 8% viewport width, max 60px ===== */
+  height: clamp(40px, 8vw, 60px);  /* ===== Min 40px, preferred 8% viewport width, max 60px ===== */
+  
+  border-radius: 50%;
+  border: 3px solid transparent;
+  padding: 0;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;  /* ===== FIX: Prevent buttons from shrinking =====  */
+}
+
+.color-category-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.color-category-btn[aria-pressed="true"] {
+  border-color: #333;
+  background-color: #f0f0f0;
+  box-shadow: 0 0 0 4px rgba(51, 51, 51, 0.2);
+}
+
+.color-swatch {
+  width: clamp(24px, 4.5vw, 36px);
+  height: clamp(24px, 4.5vw, 36px);
+  border-radius: 50%;
+  display: block;
+  /* ===== SINGLE SOURCE OF TRUTH: Use CSS custom properties set by JavaScript from FOOD_COLORS ===== */
+  /* The property --food-color-{colorName} is set by inline script in Twig ===== */
+  background-color: var(--food-color-green, #27ae60);  /* ===== Default to green for initial load ===== */
+}
+
+/* ===== Set swatch color based on parent button's data-color attribute ===== */
+.color-category-btn[data-color="red"] .color-swatch {
+  background-color: var(--food-color-red, #b81706ff);
+}
+
+.color-category-btn[data-color="orange"] .color-swatch {
+  background-color: var(--food-color-orange, #e67e22);
+}
+
+.color-category-btn[data-color="yellow"] .color-swatch {
+  background-color: var(--food-color-yellow, #f3d112ff);
+}
+
+.color-category-btn[data-color="green"] .color-swatch {
+  background-color: var(--food-color-green, #27ae60);
+}
+
+.color-category-btn[data-color="blue"] .color-swatch {
+  background-color: var(--food-color-blue, #0c1a57ff);
+}
+
+.color-category-btn[data-color="violet"] .color-swatch {
+  background-color: var(--food-color-violet, #541f69ff);
+}
+
+.color-category-btn[data-color="brown"] .color-swatch {
+  background-color: var(--food-color-brown, #47240bff);
+}
+
+.color-category-btn[data-color="black"] .color-swatch {
+  background-color: var(--food-color-black, #000000ff);
+}
+
+.color-category-btn[data-color="white"] .color-swatch {
+  background-color: var(--food-color-white, #f2f5f7ff);
+}
+
+/* FOOD GALLERY - RESPONSIVE HEIGHT WITH HORIZONTAL SCROLL */
+.food-gallery-scroll {
+  width: 100%;
+  /* ===== Responsive height: fit content with scrollbar space ===== */
+  height: auto;
+  max-height: clamp(180px, 25vh, 280px);  /* ===== Min 180px, max 280px, scales with viewport ===== */
+  overflow-x: auto;  /* ===== Horizontal scroll for overflow items ===== */
+  overflow-y: hidden;  /* ===== No vertical scroll ===== */
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+  border: 5px solid #e0e0e0;
+  border-radius: 0.375rem;
+  background-color: #fafafa;
+  
+  /* ===== SMOOTH SCROLLING ===== */
+  scroll-behavior: smooth;
+}
+
+.food-gallery-grid {
+  /* ===== FIX: Use flexbox for horizontal layout instead of grid ===== */
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  min-width: min-content;  /* ===== Important: allows overflow ===== */
+  height: fit-content;
+}
+
+/* FOOD ITEM - Layout */
+.food-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  cursor: grab;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+  border: 2px solid transparent;
+  user-select: none;
+  
+  /* ===== CRITICAL FOR TOUCH DRAGGING ===== */
+  touch-action: none;
+  -webkit-user-drag: none;
+  
+  /* ===== WHITE BACKGROUND ===== */
+  background-color: #ffffff;
+  color: var(--wormchat-body-color, #212529);
+  
+  /* ===== HIDDEN BY DEFAULT (until category selected) ===== */
+  display: none;
+  
+  /* ===== FIX: Flex-based sizing for horizontal layout ===== */
+  flex: 0 0 auto;  /* ===== Don't grow or shrink, use fixed size ===== */
+  width: clamp(100px, 12vw, 140px);  /* ===== Responsive width based on viewport ===== */
+  min-height: 140px;
+}
+
+/* FOOD ITEM - VISIBLE WHEN MATCHES SELECTED COLOR */
+.food-item.visible {
+  display: flex;
+}
+
+.food-item:hover {
+  background-color: #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: var(--wormchat-secondary, #81c784);
+  transform: scale(1.05);
+}
+
+/* ===== FIX: Better visual feedback during drag ===== */
+.food-item.dragging {
+  opacity: 0.8;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  border-color: var(--wormchat-secondary, #81c784);
+  background-color: rgba(255, 255, 255, 0.95);
+  z-index: 3000;  /* ===== FIX: HIGHEST z-index - above all other elements including cups ===== */
+}
+
+.food-item img {
+  width: 100%;
+  height: auto;
+  background-color: #ffffff;  /* ===== WHITE BACKGROUND FOR TRANSPARENT IMAGES ===== */
+  border-radius: 0.25rem;
+  padding: 0.25rem;
+  
+  /* ===== REMOVE pointer-events: auto - let events bubble to parent =====  */
+  /* pointer-events: auto; */
+  
+  -webkit-user-drag: none;
+  touch-action: none;
+}
+
+.food-label {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: center;
+  color: var(--wormchat-body-color, #212529);
+  word-break: break-word;
+  width: 100%;
+}
+
+/* CHOPPING BOARD */
+.chopping-board {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 2 / 1;
+  background-color: #ffffff;  /* ===== CHANGED TO WHITE ===== */
+  background-image: url('../images/choppingboard.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-attachment: scroll;
+  position: relative;
+  z-index: 5;  /* ===== FIX: Background layer - all dragged items (z-index 1000+) will be in front ===== */
+  flex: 1;
+  min-height: 200px;
+}
+
+.board-instruction {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2rem;
+  color: var(--wormchat-body-color, #212529);
+  text-align: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* BOARD ITEMS */
+.board-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+.board-item {
+  /* ===== RESPONSIVE SIZING: 20% of chopping board width ===== */
+  /* Board is aspect-ratio 2:1, so we calculate width dynamically */
+  width: 20%;  /* ===== 20% of board width (responsive) ===== */
+  aspect-ratio: 1 / 1;  /* ===== Keep square shape ===== */
+  max-width: 120px;  /* ===== Limit on large screens ===== */
+  min-width: 60px;  /* ===== Minimum size on small screens ===== */
+  padding: 0.25rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  border: 2px solid var(--wormchat-border-color, #dee2e6);
+  position: relative;
+  flex-shrink: 0;
+  
+  /* ===== WHITE BACKGROUND ===== */
+  background-color: #ffffff;
+  color: var(--wormchat-body-color, #212529);
+}
+
+.board-item:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: var(--wormchat-secondary, #81c784);
+  background-color: #f0f0f0;
+}
+
+.board-item[data-isChopped="true"] {
+  opacity: 0.7;
+}
+
+.board-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;  /* ===== CHANGED: contain instead of auto to fill space while keeping aspect ratio ===== */
+  background-color: transparent;  /* ===== IMAGE BACKGROUND TRANSPARENT SINCE CONTAINER IS WHITE ===== */
+  border-radius: 0.25rem;
+  /* ===== REMOVE pointer-events: auto - let events bubble to parent =====  */
+  /* pointer-events: auto; */
+  
+  touch-action: none;
+  -webkit-user-drag: none;
+}
+
+/* CHOP ACTION - NOW IN SAME ROW AS CHOPPING BOARD */
+.chop-action {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  flex-shrink: 0;
+  width: 100%;  
+  height: 100%; 
+}
+
+#chopBtn {
+  width: 90%;  /* =====  Use 90% of column width ===== */
+  height: auto;  /* ===== Let aspect ratio determine height ===== */
+  cursor: grab;
+  border-radius: 0.375rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/  /* commented out box-shadow for consistency*/
+  /* ===== TOUCH SUPPORT - ALLOW TOUCH DRAGGING ===== */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#chopBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+#chopBtn:active {
+  transform: scale(0.98);
+  cursor: grabbing;
+}
+
+#chopBtn.dragging {
+  z-index: 3001;  /* ===== Higher than food items, highest of all ===== */
+  opacity: 0.7;
+}
+
+/* CHOPPING ROW: Board + Knife */
+.chopping-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex: 1;  /* =====  Use available vertical space ===== */
+  min-height: 400px;  /* =====  Increased height for chopping board ===== */
+}
+
+.chopping-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chopping-column-main {
+  flex: 0 0 75%;  /* ===== Column 1: 75% width ===== */
+}
+
+.chopping-column-secondary {
+  flex: 0 0 25%;  /* ===== Column 2: 25% width ===== */
+  padding: 1rem;
+}
+
+/* ===== CUPS ROW: Cups + Feeding Done ===== */
+.cups-row {
+  display: flex;
+  gap: 1rem;
+  height: auto;
+  min-height: 80px;  /* ===== Minimum height to match button =====  */
+  margin-top: auto;  /* =====  Push to bottom ===== */
+  padding-top: 1rem;  /* ===== Visual separation from chopping row ===== */
+}
+
+.cups-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.cups-column-main {
+  flex: 0 0 75%;  /* ===== Column 1: 75% width (same as chopping row) ===== */
+  flex-wrap: wrap;
+  padding: 0.5rem;
+  background-color: #ffffff;
+}
+
+.cups-column-secondary {
+  flex: 0 0 25%;  /* ===== Column 2: 25% width (same as chopping row) ===== */
+  padding: 0.5rem;
+}
+
+.cup {
+  width: auto;  /* ===== Let height determine size (aspect ratio preserved) ===== */
+  max-height: 90%;  /* =====  Fill 90% of row height, but don't exceed ===== */
+  max-width: 150px;  /* =====  Constrain width so cup stays in column ===== */
+  cursor: pointer;
+  transition: all 0.2s ease;
+  /*filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));*/
+}
+
+.cup:hover {
+  transform: scale(1.05);
+  /*filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));*/
+}
+
+#feedingDone {
+  width: 100%;
+  height: 100%;
+  min-height: 80px;
+  padding: 1rem;
+  font-size: clamp(14px, 2vw, 18px);  /* ===== Responsive font size ===== */
+  font-weight: 600;
+  border: 2px solid #ddd;
+  border-radius: 0.5rem;
+  background-color: #1E4026;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+#feedingDone:hover {
+  background-color: #1E4026;
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+#feedingDone:active {
+  transform: scale(0.98);
+}
+
+/* ===== Z-INDEX HIERARCHY ===== */
+/* 5: Chopping board (background) */
+/* 1: Board instruction text */
+/* 2: Board items (static) */
+/* 3000: Dragged food items (always on top) */
+/* 3001: Dragged knife (always on top) */
+
+/* RESPONSIVE BREAKPOINTS */
+@media (max-width: 768px) {
+  .color-categories-row {
+    gap: 0.5rem;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .chopping-row {
+    min-height: 350px;  /* ===== FIX: Minimum height, but flex: 1 still uses available space ===== */
+    gap: 0.75rem;
+  }
+
+  .chopping-column-secondary {
+    padding: 0.75rem;
+  }
+
+  .cups-row {
+    min-height: 100px;
+    gap: 0.75rem;
+  }
+
+  .cups-column {
+    gap: 0.75rem;
+  }
+
+  .cups-column-main {
+    padding: 0.4rem;
+  }
+
+  .cups-column-secondary {
+    padding: 0.4rem;
+  }
+
+  #feedingDone {
+    min-height: 70px;
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .color-categories-row {
+    gap: 0.4rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .chopping-row {
+    min-height: 280px;  /* ===== FIX: Minimum height, but flex: 1 still uses available space ===== */
+    gap: 0.5rem;
+  }
+
+  .chopping-column-secondary {
+    padding: 0.5rem;
+  }
+
+  .cups-row {
+    min-height: 90px;
+    gap: 0.5rem;
+  }
+
+  .cups-column {
+    gap: 0.5rem;
+  }
+
+  .cups-column-main {
+    padding: 0.25rem;
+  }
+
+  .cups-column-secondary {
+    padding: 0.25rem;
+  }
+
+  #feedingDone {
+    min-height: 60px;
+    padding: 0.5rem;
+    font-size: 14px;
+  }
+}

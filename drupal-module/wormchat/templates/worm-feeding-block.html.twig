@@ -1,0 +1,97 @@
+<div id="feeding-wrapper" class="feeding-wrapper container-fluid">
+
+  {# ===== COLOR CATEGORIES ROW ===== #}
+  <div class="color-categories-row">
+    {# ===== ITERATE OVER ALL COLORS FROM JS CONFIG ===== #}
+    {# Note: Colors are defined in wormFeeding.js FOOD_COLORS object #}
+    {% set colors = [
+      { name: 'red', label: 'Red' },
+      { name: 'orange', label: 'Orange' },
+      { name: 'yellow', label: 'Yellow' },
+      { name: 'green', label: 'Green' },
+      { name: 'blue', label: 'Blue' },
+      { name: 'violet', label: 'Violet' },
+      { name: 'brown', label: 'Brown' },
+      { name: 'black', label: 'Black' },
+      { name: 'white', label: 'White' }
+    ] %}
+
+    {% for color in colors %}
+      <button
+        class="color-category-btn"
+        data-color="{{ color.name }}"
+        aria-label="Filter by {{ color.label }} foods"
+        {% if color.name == 'green' %}aria-pressed="true"{% endif %}
+        title="Show {{ color.label }} foods"
+      >
+        <span class="color-swatch"></span>  {# ===== Color set by CSS custom property from JavaScript ===== #}
+      </button>
+    {% endfor %}
+  </div>
+
+  <!-- Scrollable GALLERY (also a drop zone) -->
+  <div class="food-gallery-scroll" id="galleryDropZone">
+    <div class="food-gallery-grid">
+      {% if foods %}
+        {% for food in foods %}
+          <div class="food-item" 
+               draggable="true"
+               data-food-key="{{ food.name }}"
+               data-food-src="{{ food.src }}"
+               data-color="{{ food.color }}">
+            <img src="{{ food.src }}" alt="{{ food.name }}" draggable="false" />
+            <div class="food-label">{{ food.name }}</div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>{{ 'No food items available.'|t }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- CHOPPING ROW: Board (75%) + Knife (25%) -->
+  <div class="chopping-row">
+    <div class="chopping-column chopping-column-main">
+      <div id="choppingBoard" class="chopping-board" aria-live="polite">
+        <div class="board-instruction"></div>
+        <div id="boardItems" class="board-items"></div>
+      </div>
+    </div>
+
+    <div class="chopping-column chopping-column-secondary">
+      <div class="chop-action">
+        <img id="chopBtn" class="chop-button" src="/modules/custom/wormchat/images/knife.png" alt="Kleinschneiden" />
+      </div>
+    </div>
+  </div>
+
+  <!-- CUPS ROW: Cups (75%) + Feeding Done (25%) -->
+  <div class="cups-row">
+    <div class="cups-column cups-column-main">
+      <img class="cup" data-cups="1" data-cup-id="cup-1" src="/modules/custom/wormchat/images/1cups_empty.png" alt="1 cup" draggable="false"/>
+      <img class="cup" data-cups="2" data-cup-id="cup-2" src="/modules/custom/wormchat/images/2cups_empty.png" alt="2 cups" draggable="false"/>
+    </div>
+
+    <div class="cups-column cups-column-secondary">
+      <img id="feedingDone" class="feeding-done-button" src="/modules/custom/wormchat/images/give_cups_empty.png" alt="Feeding done" draggable="false"/>
+    </div>
+  </div>
+
+</div>
+
+{# ===== INLINE SCRIPT: Initialize CSS custom properties from JS FOOD_COLORS config ===== #}
+<script>
+  // ===== Sync JS FOOD_COLORS config to CSS custom properties ===== 
+  document.addEventListener('DOMContentLoaded', function() {
+    if (window.FOOD_COLORS) {
+      const root = document.documentElement;
+      // Set CSS custom properties for each color from FOOD_COLORS
+      for (const [colorName, colorConfig] of Object.entries(window.FOOD_COLORS)) {
+        root.style.setProperty('--food-color-' + colorName, colorConfig.hex);
+      }
+      console.log('CSS custom properties initialized from FOOD_COLORS');
+    } else {
+      console.warn('window.FOOD_COLORS not available - colors will use fallback values');
+    }
+  });
+</script>

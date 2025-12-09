@@ -1,0 +1,105 @@
+{
+  "ruleChain": {
+    "name": "15m cn from feeding aggregator",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null,
+    "additionalInfo": {
+      "description": "Aggregates telemetry over last 15 minutes to compute c/n value value"
+    }
+  },
+  "metadata": {
+    "version": 10,
+    "firstNodeIndex": 1,
+    "nodes": [
+      {
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Script: calculate aggregated value",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 0,
+        "configuration": {
+          "scriptLang": "JS",
+          "jsScript": "var materialStr = metadata.material || [];\nvar amountStr = metadata.amount_cups || [];\n\n// Parse JSON strings into arrays\nvar material = [];\nvar amounts = [];\n\ntry {\n  // First parse: convert string to object/array\n  var materialParsed = JSON.parse(materialStr);\n  var amountParsed = JSON.parse(amountStr);\n  \n  // Check if result is still a string (double-escaped), parse again\n  if (typeof materialParsed === 'string') {\n    materialParsed = JSON.parse(materialParsed);\n  }\n  if (typeof amountParsed === 'string') {\n    amountParsed = JSON.parse(amountParsed);\n  }\n  \n  // Now extract values from array of {ts, value} objects\n  if (Array.isArray(materialParsed)) {\n    material = materialParsed.map(function(item) { return item.value; });\n  }\n  if (Array.isArray(amountParsed)) {\n    amounts = amountParsed.map(function(item) { return item.value; });\n  }\n} catch (e) {\n  return { msg: { error: \"Parse error: \" + e.message }, metadata: metadata };\n}\n\n//\"[{\\\"ts\\\":1756479300000,\\\"value\\\":\\\"bread\\\"},{\\\"ts\\\":1756479360000,\\\"value\\\":\\\"bread\\\"},{\\\"ts\\\":1756479420000,\\\"value\\\":\\\"paper\\\"}]\"\n// \"[{\\\"ts\\\":1756479300000,\\\"value\\\":45},{\\\"ts\\\":1756479360000,\\\"value\\\":45},{\\\"ts\\\":1756479420000,\\\"value\\\":46}]\"\n/**\n * Calculate overall C/N ratio of recent feedings based on the C/N ratio of each material.\n * Designed for a ThingsBoard Rule Chain \"Script\" node.\n * Sources for calculation:\n * https://cwmi.css.cornell.edu/chapter3.pdf#:~:text=Once%20you%20have%20the%20percent,of%20material%20n\n */\n\n// Material data (dry basis): approximate C/N ratio, moisture (%), and bulk density (g per cup)\n// Sources: Sustainability 2023, 15(7), 6191; https://doi.org/10.3390/su15076191 and https://cwmi.css.cornell.edu/AppendixATable1OFCH.pdf#:~:text=Garbage%20%28food%20waste%29%20Typical%201.9,20\n\n//assuming one cup ==250ml\nvar ppcy_to_gpml= 1685;\nvar MATERIAL_DATA = {\n  \"fruit_waste\": { cn: 40, moisture: 80, density_g_per_cup: 120 },\n  \"vegetable_scraps\": { cn: 13, moisture: 85, density_g_per_cup: 150 },\n  \"coffee_grounds\": { cn: 20, moisture: 60, density_g_per_cup: 90 },\n  \"bread\": { cn: 5, moisture: 35, density_g_per_cup: 80 },\n  \"paper\": { cn: 150, moisture: 18, density_g_per_cup: 40 },\n  \"cardboard\": { cn: 563, moisture: 8, density_g_per_cup: 38 },\n  \"grass_clippings\": { cn: 17, moisture: 82, density_g_per_cup: 60 },\n  \"leaves\": { cn: 54, moisture: 38, density_g_per_cup: 60 },\n  \"shrub_trimmings\": { cn: 53, moisture: 15, density_g_per_cup: 65 },\n};\n\n// Initialize accumulators for weighted C/N computation\nvar weightedSum = 0;\nvar totalDryMass = 0;\n\n// Process each feeding entry\n\nfor (var i = 0; i < material.length; i++) {\n      var mat = MATERIAL_DATA[material[i]];\n      var cups = Number(amounts[i]);\n      if (!mat || isNaN(cups) || cups <= 0) continue;\n     \n      // Convert cups to wet mass (g)\n      var wetMass = cups * mat.density_g_per_cup;\n\n      // Convert to dry mass using moisture content\n      var dryMass = wetMass * (1 - mat.moisture / 100);\n\n      // Weight contribution = dryMass * (1 / C/N)\n      // Since C/N is a ratio, we weight by the inverse to get a mass-weighted harmonic mean\n      weightedSum += dryMass / mat.cn;\n      totalDryMass += dryMass;\n\n}\n\n\n// Compute overall (harmonic mean) C/N ratio\nvar cnRatio = (weightedSum > 0) ? totalDryMass / weightedSum : null;\n\n// Return message for next node\nreturn { msg: {c_n_value: cnRatio}, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\" };\n\n\n",
+          "tbelScript": ""
+        },
+        "additionalInfo": {
+          "description": null,
+          "layoutX": 826,
+          "layoutY": 215
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.metadata.TbGetTelemetryNode",
+        "name": "get last 15min feeding data",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 2,
+        "configuration": {
+          "latestTsKeyNames": [
+            "material",
+            "amount_cups"
+          ],
+          "aggregation": "NONE",
+          "fetchMode": "ALL",
+          "orderBy": "ASC",
+          "limit": 15,
+          "useMetadataIntervalPatterns": false,
+          "startIntervalPattern": "",
+          "endIntervalPattern": "",
+          "startInterval": 15,
+          "startIntervalTimeUnit": "MINUTES",
+          "endInterval": 1,
+          "endIntervalTimeUnit": "MILLISECONDS"
+        },
+        "additionalInfo": {
+          "description": "in case a user sends every material in a separate post, we get all feeding telemetry of the last 15 minutes ",
+          "layoutX": 411,
+          "layoutY": 151
+        }
+      },
+      {
+        "type": "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode",
+        "name": "save_cn",
+        "debugSettings": null,
+        "singletonMode": false,
+        "queueName": null,
+        "configurationVersion": 1,
+        "configuration": {
+          "defaultTTL": 0,
+          "useServerTs": false,
+          "processingSettings": {
+            "type": "ON_EVERY_MESSAGE"
+          }
+        },
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1093,
+          "layoutY": 141
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 2,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 0,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 2,
+        "type": "Failure"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}

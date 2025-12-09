@@ -1,0 +1,37 @@
+<div class="wormchat-food-list">
+  <h1>{{ 'Food Items'|t }}</h1>
+
+  <a href="{{ add_url }}" class="btn btn-primary">{{ 'Add New Food Item'|t }}</a>
+
+  {% if items %}
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>{{ 'Image'|t }}</th>
+          <th>{{ 'Name'|t }}</th>
+          <th>{{ 'Category'|t }}</th>
+          <th>{{ 'Moisture'|t }}</th>
+          <th>{{ 'Decomposition Speed'|t }}</th>
+          <th>{{ 'Actions'|t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td><img src="{{ item.image }}" alt="{{ item.name }}" style="max-width: 80px;"></td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.category }}</td>
+            <td>{{ item.moisture }}</td>
+            <td>{{ item.decomposition_speed }}</td>
+            <td>
+              <a href="{{ item.edit_url }}" class="btn btn-sm btn-secondary">{{ 'Edit'|t }}</a>
+              <a href="{{ item.delete_url }}" class="btn btn-sm btn-danger">{{ 'Delete'|t }}</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p>{{ 'No food items available.'|t }}</p>
+  {% endif %}
+</div>

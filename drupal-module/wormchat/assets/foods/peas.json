@@ -1,0 +1,19 @@
+{
+    "id": "peas",
+    "name": "Erbsen",
+    "color": "green",
+    "category": "vegetables",
+    "moisture": "medium",
+    "decomposition_speed": "fast",
+    "nutrient_profile": "",
+    "sensor_fingerprint": {
+        "smell": "",
+        "temperature_change": "",
+        "pH_effect": "",
+        "moisture_effect": ""
+    },
+    "user_guidance": {
+        "do": [],
+        "dont": []
+    }
+}

@@ -1,0 +1,281 @@
+<?php
+
+/**
+ * @file
+ * Contains hooks and helper functions for the Worm Chat module.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function wormchat_theme($existing, $type, $theme, $path) {
+  return [
+    'worm_chat_block' => [
+      'variables' => [
+        'video_src' => NULL,
+        'bubble_image' => NULL,
+      ],
+      'template' => 'worm-chat-block',
+    ],
+    'worm_feeding_block' => [
+      'variables' => [
+        'foods' => [],
+      ],
+      'template' => 'worm-feeding-block',
+    ],
+    'wormchat_food_list' => [
+      'variables' => [
+        'items' => [],
+        'add_url' => '',
+      ],
+      'template' => 'wormchat-food-list',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_page_attachments().
+ * Do NOT expose device key directly - only pass ThingsBoard URL
+ * Also inject theme CSS variables for wormchat styling.
+ */
+function wormchat_page_attachments(array &$attachments) {
+  // 1. Attach ThingsBoard URL as drupalSettings
+  $attachments['#attached']['drupalSettings']['wormchat'] = [
+    'thingsBoardUrl' => \Drupal::config('wormchat.settings')->get('thingsboard_url') ?? 'https://thingsboard.cloud',
+  ];
+
+  // 2. Get theme colors from theme settings or use defaults
+  $theme = \Drupal::config('system.theme')->get('default');
+  $theme_config = \Drupal::config($theme . '.settings');
+  
+  $primary_color = $theme_config->get('primary_color') ?? '#007bff';
+  $secondary_color = $theme_config->get('secondary_color') ?? '#6c757d';
+  $body_bg = $theme_config->get('body_bg') ?? '#ffffff';
+  $body_color = $theme_config->get('body_color') ?? '#212529';
+  $border_color = $theme_config->get('border_color') ?? '#dee2e6';
+  $warning_color = $theme_config->get('warning_color') ?? '#fff3cd';
+  
+  // 3. Inject CSS variables into html_head
+  $css_variables = ":root {
+    --wormchat-primary: {$primary_color};
+    --wormchat-secondary: {$secondary_color};
+    --wormchat-body-bg: {$body_bg};
+    --wormchat-body-color: {$body_color};
+    --wormchat-border-color: {$border_color};
+    --wormchat-warning: {$warning_color};
+  }";
+
+  $attachments['#attached']['html_head'][] = [
+    [
+      '#tag' => 'style',
+      '#value' => $css_variables,
+      '#attributes' => ['type' => 'text/css'],
+    ],
+    'wormchat-css-variables',
+  ];
+}
+
+/**
+ * Implements hook_rest_resource_alter().
+ */
+function wormchat_rest_resource_info_alter(&$definitions) {
+  // REST endpoint defined in wormchat.routing.yml
+}
+
+function wormchat_user_login(\Drupal\user\UserInterface $account) {
+  // Redirect to front page after login
+  $_GET['destination'] = '<front>';
+}
+
+/**
+ * Implements hook_form_alter().
+ * Adds validation to worm_food media forms to prevent duplicate food IDs.
+ * Pre-fills metadata textarea with template for new/edited items.
+ */
+function wormchat_form_alter(&$form, &$form_state, $form_id) {
+  // Target the media edit form for worm_food bundle
+  if ($form_id === 'media_worm_food_edit_form' || $form_id === 'media_worm_food_form') {
+    // Add custom validation callback
+    $form['#validate'][] = 'wormchat_validate_food_id_unique';
+    
+    // Pre-fill metadata with template
+    $form['#process'][] = 'wormchat_prefill_metadata_template';
+    
+    // Make food ID read-only when editing
+    $media = $form_state->getFormObject()->getEntity();
+    if (!$media->isNew()) {
+      $form['field_food_id']['widget'][0]['value']['#disabled'] = TRUE;
+      \Drupal::messenger()->addMessage(t('Food ID cannot be changed after creation.'), 'info');
+    }
+  }
+}
+
+/**
+ * Form process callback to pre-fill metadata textarea with template.
+ */
+function wormchat_prefill_metadata_template(&$form, FormStateInterface $form_state) {
+  if (!isset($form['field_food_metadata'])) {
+    return $form;
+  }
+  
+  $media = $form_state->getFormObject()->getEntity();
+  
+  // Only pre-fill if field is empty (new item or empty edit)
+  if ($media->isNew() || empty($form['field_food_metadata']['widget'][0]['value']['#default_value'])) {
+    $template = _wormchat_get_metadata_template();
+    $form['field_food_metadata']['widget'][0]['value']['#default_value'] = $template;
+  }
+  
+  return $form;
+}
+
+/**
+ * Helper function: Get metadata template for new food items.
+ */
+function _wormchat_get_metadata_template() {
+  $template = [
+    'moisture' => '',
+    'decomposition_speed' => '',
+    'nutrient_profile' => '',
+    'sensor_fingerprint' => [
+      'smell' => '',
+      'temperature_change' => '',
+      'pH_effect' => '',
+      'moisture_effect' => '',
+    ],
+    'user_guidance' => [
+      'do' => [],
+      'dont' => [],
+    ],
+  ];
+  
+  return json_encode($template, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+}
+
+/**
+ * Custom validation callback for food ID uniqueness.
+ * Ensures that the food_id field value is unique across all worm_food media entities.
+ */
+function wormchat_validate_food_id_unique(&$form, &$form_state) {
+  // Only validate if field_food_id has a value
+  if (empty($form_state->getValue('field_food_id'))) {
+    return;
+  }
+
+  $food_id = $form_state->getValue('field_food_id')[0]['value'] ?? NULL;
+  if (!$food_id) {
+    \Drupal::messenger()->addError(t('Food ID is required.'));
+    $form_state->setErrorByName('field_food_id', t('Food ID is required.'));
+    return;
+  }
+
+  // Get the current media entity (if editing)
+  $media = $form_state->getFormObject()->getEntity();
+  $current_media_id = $media->id();
+
+  // Query for existing food items with this ID
+  $existing = \Drupal::entityQuery('media')
+    ->condition('bundle', 'worm_food')
+    ->condition('field_food_id', $food_id)
+    ->accessCheck(FALSE)
+    ->execute();
+
+  // If found, check if it's the current entity being edited
+  if (!empty($existing)) {
+    $existing_id = reset($existing);
+    
+    // If it's a different entity, it's a duplicate
+    if ($existing_id != $current_media_id) {
+      $form_state->setErrorByName('field_food_id', 
+        t('A food item with ID "@id" already exists. Please use a unique ID or edit the existing item instead.', 
+          ['@id' => $food_id]));
+    }
+  }
+}
+
+/**
+ * Implements hook_entity_presave().
+ * When a worm_food media is saved, create/update JSON file in assets/foods directory.
+ */
+function wormchat_entity_presave(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() !== 'media' || $entity->bundle() !== 'worm_food') {
+    return;
+  }
+
+  // Get the field values
+  $food_id = $entity->get('field_food_id')->value ?? NULL;
+  $food_name = $entity->get('field_food_name')->value ?? NULL;
+  $food_color = $entity->get('field_food_color')->value ?? NULL;
+  $food_category = $entity->get('field_food_category')->value ?? NULL;
+  $metadata_json = $entity->get('field_food_metadata')->value ?? '{}';
+
+  // Validate mandatory fields
+  if (!$food_id || !$food_name || !$food_color || !$food_category) {
+    \Drupal::logger('wormchat')->warning('Cannot create JSON: Missing mandatory fields for @food_id', 
+      ['@food_id' => $food_id ?? 'unknown']);
+    return;
+  }
+
+  // Parse metadata JSON
+  $metadata = json_decode($metadata_json, TRUE) ?? [];
+
+  // Build complete food data structure
+  $food_data = [
+    'id' => $food_id,
+    'name' => $food_name,
+    'color' => $food_color,
+    'category' => $food_category,
+    'moisture' => $metadata['moisture'] ?? '',
+    'decomposition_speed' => $metadata['decomposition_speed'] ?? '',
+    'nutrient_profile' => $metadata['nutrient_profile'] ?? '',
+    'sensor_fingerprint' => $metadata['sensor_fingerprint'] ?? [
+      'smell' => '',
+      'temperature_change' => '',
+      'pH_effect' => '',
+      'moisture_effect' => '',
+    ],
+    'user_guidance' => $metadata['user_guidance'] ?? [
+      'do' => [],
+      'dont' => [],
+    ],
+  ];
+
+  // Write JSON file to assets/foods directory
+  _wormchat_write_food_json($food_id, $food_data);
+}
+
+/**
+ * Helper function: Write food data to JSON file.
+ * Creates/updates {food_id}.json in the assets/foods directory.
+ */
+// filepath: [wormchat.module](http://_vscodecontentref_/1)
+function _wormchat_write_food_json($food_id, $food_data) {
+  $module_path = \Drupal::service('extension.list.module')->getPath('wormchat');
+  
+  // Resolve symlinks to get real path
+  $real_module_path = realpath($module_path);
+  if (!$real_module_path) {
+    \Drupal::logger('wormchat')->error('Could not resolve module path: @path', ['@path' => $module_path]);
+    return;
+  }
+  
+  $assets_path = $real_module_path . '/assets/foods';
+  $json_file = $assets_path . '/' . $food_id . '.json';
+
+  // Ensure directory exists
+  if (!is_dir($assets_path)) {
+    mkdir($assets_path, 0755, TRUE);
+  }
+
+  // Write JSON file
+  $json_content = json_encode($food_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+  
+  if (file_put_contents($json_file, $json_content) !== FALSE) {
+    \Drupal::logger('wormchat')->info('Created/updated food JSON: @file', ['@file' => $json_file]);
+  } else {
+    \Drupal::logger('wormchat')->error('Failed to write food JSON: @file', ['@file' => $json_file]);
+  }
+}

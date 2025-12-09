@@ -1,0 +1,13 @@
+name: Worm Chat
+type: module
+description: Provides the interactive worm chat block and supporting logic, with ThingsBoard integration.
+core_version_requirement: ^10
+dependencies:
+  - drupal:block
+  - drupal:media
+  - drupal:rest
+  - drupal:jsonapi
+  - drupal:user
+  - drupal:field
+  - drupal:file
+  - drupal:image

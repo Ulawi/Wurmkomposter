@@ -1,0 +1,19 @@
+{
+    "id": "greengrapes",
+    "name": "Grüne Trauben",
+    "color": "green",
+    "category": "fruits",
+    "moisture": "high",
+    "decomposition_speed": "fast",
+    "nutrient_profile": "",
+    "sensor_fingerprint": {
+        "smell": "",
+        "temperature_change": "",
+        "pH_effect": "",
+        "moisture_effect": ""
+    },
+    "user_guidance": {
+        "do": [],
+        "dont": []
+    }
+}

@@ -1,0 +1,24 @@
+wormchat:
+  version: 1.x
+  css:
+    theme:
+      css/chat.css: {}
+  js:
+    js/wormchat.js: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/drupalSettings
+    - core/once
+
+wormFeeding:
+  version: 1.0
+  js:
+    js/wormFeeding.js: {}
+  css:
+    theme:
+      css/feeding.css: {}
+  dependencies:
+    - core/drupal
+    - core/jquery
+    - core/once

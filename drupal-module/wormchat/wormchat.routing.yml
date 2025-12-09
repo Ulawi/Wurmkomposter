@@ -1,0 +1,96 @@
+# REST resource for fetching user device key
+rest.user_device_key.GET:
+  path: '/api/v1/user/device-key'
+  defaults:
+    _controller: '\Drupal\rest\Plugin\rest\resource\UserDeviceKeyResource'
+    _format: 'json'
+  requirements:
+    _permission: 'access content'
+    _format: 'json'
+  methods: [GET]
+
+wormchat.add_food:
+  path: '/admin/wormchat/add-food'
+  defaults:
+    _form: '\Drupal\wormchat\Form\AddFoodItemForm'
+    _title: 'Add Food Item'
+  requirements:
+    _permission: 'administer site configuration'
+
+wormchat.food_list:
+  path: '/admin/wormchat/foods'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\FoodListController::list'
+    _title: 'Food Items'
+  requirements:
+    _permission: 'administer site configuration'
+
+wormchat.telemetry:
+  path: '/api/worm/telemetry'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\TelemetryController::sendTelemetry'
+  requirements:
+    _access: 'TRUE'
+  methods: [POST]
+
+wormchat.device_key:
+  path: '/api/v1/user/device-key'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\TelemetryController::getDeviceKey'
+  requirements:
+    _access: 'TRUE'
+  methods: [GET]
+
+# ===== NEW ROUTE FOR FETCHING WORM STATE =====
+wormchat.state:
+  path: '/api/v1/worm/state'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\TelemetryController::getWormState'
+  requirements:
+    _access: 'TRUE'
+
+# ===== VIDEO ROUTES =====
+# Get video for specific worm state
+wormchat.video.by_state:
+  path: '/api/worm/video/{state}'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\WormVideoController::getVideoByState'
+  requirements:
+    _permission: 'access content'
+  methods: [GET]
+
+# Get all available worm state videos
+wormchat.video.all:
+  path: '/api/worm/videos'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\WormVideoController::getAllVideos'
+  requirements:
+    _permission: 'access content'
+  methods: [GET]
+
+# Get list of available worm states
+wormchat.video.states:
+  path: '/api/worm/video-states'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\WormVideoController::getAvailableStates'
+  requirements:
+    _permission: 'access content'
+  methods: [GET]
+
+# Check if video exists for state
+wormchat.video.exists:
+  path: '/api/worm/video/{state}/exists'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\WormVideoController::checkVideoExists'
+  requirements:
+    _permission: 'access content'
+  methods: [GET]
+
+# Get a random video file for a state
+wormchat.video.random:
+  path: '/api/worm/video/{state}/random'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\WormVideoController::getRandomVideoForState'
+  requirements:
+    _permission: 'access content'
+  methods: [GET]
