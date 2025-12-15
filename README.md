@@ -53,6 +53,7 @@ Hier ist eine Liste aller Teile, die du für dieses Projekt benötigst. Wir habe
   
   Mit diesem Sensor können verschiedene Gase gemessen werden, u.a. Methan ( [Datenblatt](https://www.olimex.com/Products/Components/Sensors/Gas/SNS-MQ2/resources/MQ2.pdf) ).
   
+- 1x Lichtsensor https://wiki.seeedstudio.com/Grove-Light_Sensor/#upgradable-to-industrial-sensors
 - 1x USB-C Kabel zum Anschluss des XIAO an den PC während des Aufbaus
 - 1x USB-C Ladegerät für die Stromversorgung
 - Ein Gehäuse, das den XIAO vor Schmutz und Feuchtigkeit schützt. Falls du den Wurmkomposter nur in Innenräumen benutzt, kannst du als Gehäuse auch etwas verwenden oder upcyclen, was du zur Hand hast. Wir haben hier eine Installationsdose verwendet.
@@ -130,6 +131,9 @@ Dieser Schritt erklärt, wie die Sensoren mit dem XIAO verbunden werden. Da wir 
    <img width="75%" alt="Foto-kleine-Platine-mit-Pullup-und-Stecker-und-Temperatursensor" src="https://github.com/user-attachments/assets/2c783010-84c8-404b-814f-f5834eff4257" />
 
    <img width="50%" alt="Schema-der-Platine" src="https://github.com/user-attachments/assets/260c17b0-87c7-43f2-8b7f-c725fa767a75" />
+
+8. Lichtsensor anschließen:
+   Der Lichtsensor nimmt über die Veränderung der Helligkeit war, wenn der Deckel geöffnet wird.  Es ist ein analoger Sensor. Schließt ihn auf auf Steckplatz A2 an.
 
 
 
@@ -210,7 +214,7 @@ Für den Rest dieser Anleitung gehen wir davon aus, dass du dir einen Thingsboar
 Nun brauchen wir noch den Code, der die Sensordaten ausliest und an Thingsboard sendet.
 
 1. Code von GitHub herunterladen:
-   - Lade den [Source Code](https://github.com/Ulawi/Wurmkomposter/blob/main/20250610_wurmchat_for_public.ino) aus diesem Repo herunter.
+   - Lade den [Source Code](https://github.com/Ulawi/Wurmkomposter/blob/main/microcontroller/wurmchat_for_public.ino) aus diesem Repo herunter.
 2. Anpassen des Codes:
    - Öffne die .ino-Datei in der Arduino IDE.
    - Passe die <b>WLAN-Zugangsdaten</b> (SSID, PASSWORD), den THINGSBOARD_SERVER und den <b>Thingsboard Access Token</b> an deine Werte an. Diese findest du ganz oben im Code.
