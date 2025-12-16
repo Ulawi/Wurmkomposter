@@ -147,7 +147,10 @@ Dieser Schritt erklärt, wie die Sensoren mit dem XIAO verbunden werden. Da wir 
    <img width="50%" alt="Schema-der-Platine" src="https://github.com/user-attachments/assets/260c17b0-87c7-43f2-8b7f-c725fa767a75" />
 
 8. Lichtsensor anschließen:
+   
    Der Lichtsensor nimmt über die Veränderung der Helligkeit war, wenn der Deckel geöffnet wird.  Es ist ein analoger Sensor. Schließt ihn auf auf Steckplatz A2 an.
+   <img width="75%"  alt="Lichtsensor-angeschlossen-an-Grovebase" src="https://github.com/user-attachments/assets/d9982e83-ddc4-492f-b933-b8d4a0960c24" />
+
 
 
 
