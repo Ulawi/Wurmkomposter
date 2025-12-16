@@ -28,6 +28,8 @@ Hier ist eine Liste aller Teile, die du für dieses Projekt benötigst. Wir habe
 - 4x kleine Schrauben (M3x10mm), um den Gassensor und das Gehäuse am Wurmkomposter zu befestigen   
 - Wurmkomposter
 - Gehäuse
+- 
+### Die Komponenten im Detail 
 
 - 1x Seeed Studio XIAO ESP32C3
   
