@@ -20,6 +20,16 @@ Lass uns mit Baustein 1, der Hardware anfangen. Alle Komponenten sind “von der
 ## Benötigte Komponenten
 Hier ist eine Liste aller Teile, die du für dieses Projekt benötigst. Wir haben darauf geachtet, open hardware zu verwenden. Die Herstellerangaben sind nur als eine Option zu verstehen, an die Bauteile zu kommen. Wir bekommen keine Provision. 
 - 1x Seeed Studio XIAO ESP32C3
+- 1x Seeed Studio Grove Base für XIAO
+- 1 x Bodenfeuchesensor (kapazitiv)
+- 1x Temperatursensor DS18B20
+- 1x Gas-Sensor MQ-2
+- 1x Lichtsensor
+- 4x kleine Schrauben (M3x10mm), um den Gassensor und das Gehäuse am Wurmkomposter zu befestigen   
+- Wurmkomposter
+- Gehäuse
+
+- 1x Seeed Studio XIAO ESP32C3
   
   <img src="https://github.com/user-attachments/assets/c56cb338-797b-48e4-b646-12bdf7d30d1e" alt="Foto of Seeed Studio XIAO ESP32C3" width="50%" />
   <img src="https://github.com/user-attachments/assets/16c50abf-7356-422b-a9e0-1bf123c6174d" alt="pin layout" width="70%" />
