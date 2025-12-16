@@ -25,10 +25,12 @@ Hier ist eine Liste aller Teile, die du für dieses Projekt benötigst. Wir habe
 - 1x Temperatursensor DS18B20
 - 1x Gas-Sensor MQ-2
 - 1x Lichtsensor
-- 4x kleine Schrauben (M3x10mm), um den Gassensor und das Gehäuse am Wurmkomposter zu befestigen   
+- 1x USB-C Kabel zum Anschluss des XIAO an den PC während des Aufbaus
+- 1x USB-C Ladegerät für die Stromversorgung
+- 4x kleine Schrauben (M3x10mm), um den Gassensor und das Gehäuse am Wurmkomposter zu befestigen
 - Wurmkomposter
 - Gehäuse
-- 
+  
 ### Die Komponenten im Detail 
 
 - 1x Seeed Studio XIAO ESP32C3
