@@ -20,6 +20,20 @@ Lass uns mit Baustein 1, der Hardware anfangen. Alle Komponenten sind “von der
 ## Benötigte Komponenten
 Hier ist eine Liste aller Teile, die du für dieses Projekt benötigst. Wir haben darauf geachtet, open hardware zu verwenden. Die Herstellerangaben sind nur als eine Option zu verstehen, an die Bauteile zu kommen. Wir bekommen keine Provision. 
 - 1x Seeed Studio XIAO ESP32C3
+- 1x Seeed Studio Grove Base für XIAO
+- 1 x Bodenfeuchesensor (kapazitiv)
+- 1x Temperatursensor DS18B20
+- 1x Gas-Sensor MQ-2
+- 1x Lichtsensor
+- 1x USB-C Kabel zum Anschluss des XIAO an den PC während des Aufbaus
+- 1x USB-C Ladegerät für die Stromversorgung
+- 4x kleine Schrauben (M3x10mm), um den Gassensor und das Gehäuse am Wurmkomposter zu befestigen
+- Wurmkomposter
+- Gehäuse
+  
+### Die Komponenten im Detail 
+
+- 1x Seeed Studio XIAO ESP32C3
   
   <img src="https://github.com/user-attachments/assets/c56cb338-797b-48e4-b646-12bdf7d30d1e" alt="Foto of Seeed Studio XIAO ESP32C3" width="50%" />
   <img src="https://github.com/user-attachments/assets/16c50abf-7356-422b-a9e0-1bf123c6174d" alt="pin layout" width="70%" />
@@ -53,6 +67,7 @@ Hier ist eine Liste aller Teile, die du für dieses Projekt benötigst. Wir habe
   
   Mit diesem Sensor können verschiedene Gase gemessen werden, u.a. Methan ( [Datenblatt](https://www.olimex.com/Products/Components/Sensors/Gas/SNS-MQ2/resources/MQ2.pdf) ).
   
+- 1x Lichtsensor https://wiki.seeedstudio.com/Grove-Light_Sensor/#upgradable-to-industrial-sensors
 - 1x USB-C Kabel zum Anschluss des XIAO an den PC während des Aufbaus
 - 1x USB-C Ladegerät für die Stromversorgung
 - Ein Gehäuse, das den XIAO vor Schmutz und Feuchtigkeit schützt. Falls du den Wurmkomposter nur in Innenräumen benutzt, kannst du als Gehäuse auch etwas verwenden oder upcyclen, was du zur Hand hast. Wir haben hier eine Installationsdose verwendet.
@@ -130,6 +145,13 @@ Dieser Schritt erklärt, wie die Sensoren mit dem XIAO verbunden werden. Da wir 
    <img width="75%" alt="Foto-kleine-Platine-mit-Pullup-und-Stecker-und-Temperatursensor" src="https://github.com/user-attachments/assets/2c783010-84c8-404b-814f-f5834eff4257" />
 
    <img width="50%" alt="Schema-der-Platine" src="https://github.com/user-attachments/assets/260c17b0-87c7-43f2-8b7f-c725fa767a75" />
+
+8. Lichtsensor anschließen:
+   
+   Der Lichtsensor nimmt über die Veränderung der Helligkeit war, wenn der Deckel geöffnet wird.  Es ist ein analoger Sensor. Schließt ihn auf auf Steckplatz A2 an.
+   
+   <img width="75%"  alt="Lichtsensor-angeschlossen-an-Grovebase" src="https://github.com/user-attachments/assets/d9982e83-ddc4-492f-b933-b8d4a0960c24" />
+
 
 
 
@@ -210,7 +232,7 @@ Für den Rest dieser Anleitung gehen wir davon aus, dass du dir einen Thingsboar
 Nun brauchen wir noch den Code, der die Sensordaten ausliest und an Thingsboard sendet.
 
 1. Code von GitHub herunterladen:
-   - Lade den [Source Code](https://github.com/Ulawi/Wurmkomposter/blob/main/20250610_wurmchat_for_public.ino) aus diesem Repo herunter.
+   - Lade den [Source Code](https://github.com/Ulawi/Wurmkomposter/blob/main/microcontroller/wurmchat_for_public.ino) aus diesem Repo herunter.
 2. Anpassen des Codes:
    - Öffne die .ino-Datei in der Arduino IDE.
    - Passe die <b>WLAN-Zugangsdaten</b> (SSID, PASSWORD), den THINGSBOARD_SERVER und den <b>Thingsboard Access Token</b> an deine Werte an. Diese findest du ganz oben im Code.
