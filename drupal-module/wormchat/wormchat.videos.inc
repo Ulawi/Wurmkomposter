@@ -180,19 +180,20 @@ function wormchat_get_available_states() {
 }
 
 /**
- * Get all videos matching a state prefix and randomly select one.
+ * Get a random video file from a specific state subfolder.
  *
- * Scans the /sites/default/files/worm/videos/ directory for video files
- * matching the state prefix. For example, state "hot" matches:
- * - hot.mp4
- * - hot_345.mp4
- * - hot_2.mp4
+ * Scans the /sites/default/files/worm/videos/{state}/ subdirectory for any
+ * video files (*.mp4) and randomly selects one. Any file in the state folder
+ * is considered to belong to that state, regardless of filename.
+ *
+ * For example, if state is "hot", scans /worm/videos/hot/ for:
+ * - eating.mp4
+ * - sleeping.mp4
+ * - any_filename.mp4
  * - etc.
  *
- * Randomly selects one from all matching files.
- *
  * @param string $state
- *   The state (prefix) to search for (e.g., 'hot', 'cold', 'dry').
+ *   The state subfolder to search (e.g., 'hot', 'cold', 'dry').
  *
  * @return string|null
  *   The URL to the randomly selected video file, or NULL if no videos found.
@@ -203,28 +204,21 @@ function wormchat_get_random_video_by_state($state) {
     return NULL;
   }
 
-  // Define the videos directory
-  $videos_dir = 'public://worm/videos';
+  // Define the state-specific videos subdirectory
+  $videos_dir = 'public://worm/videos/' . strtolower($state);
   $realpath = \Drupal::service('file_system')->realpath($videos_dir);
 
   if (!is_dir($realpath)) {
-    \Drupal::logger('wormchat')->warning('Videos directory does not exist: @dir', ['@dir' => $realpath]);
+    \Drupal::logger('wormchat')->warning('Videos directory does not exist for state: @state (path: @dir)', 
+      ['@state' => $state, '@dir' => $realpath]);
     return NULL;
   }
 
-  // Scan directory for files matching the state prefix
-  $pattern = strtolower($state) . '_*.mp4';  // Handles: hot_1.mp4, hot_345.mp4, etc.
-  $matching_files = glob($realpath . '/' . $pattern);
-
-  // Also check for exact state name without suffix (e.g., hot.mp4)
-  $exact_file = $realpath . '/' . strtolower($state) . '.mp4';
-  if (file_exists($exact_file)) {
-    $matching_files[] = $exact_file;
-  }
+  // Scan directory for all MP4 files
+  $matching_files = glob($realpath . '/*.mp4');
 
   if (empty($matching_files)) {
-    \Drupal::logger('wormchat')->warning('No videos found for state: @state (pattern: @pattern)', 
-      ['@state' => $state, '@pattern' => $pattern]);
+    \Drupal::logger('wormchat')->warning('No videos found in state directory: @state', ['@state' => $state]);
     return NULL;
   }
 

@@ -49,7 +49,7 @@ function _wormchat_create_media_type() {
 
 /**
  * Create worm state video media type.
- * Videos for different worm health/behavior states (healthy, sick, dormant, etc).
+ * Videos for different worm health/behavior states (cold, wet, hungry, ...).
  */
 function _wormchat_create_video_media_type() {
   if (!\Drupal\media\Entity\MediaType::load('worm_state_video')) {
@@ -188,13 +188,25 @@ function _wormchat_create_video_field_storage() {
     \Drupal::logger('wormchat')->info('Created field storage: field_worm_state_video_file');
   }
 
-  // Field: field_worm_state (text field to store state name: healthy, sick, dormant, etc)
+  // Field: field_worm_state (list field to store one or more states)
   if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_worm_state')) {
     \Drupal\field\Entity\FieldStorageConfig::create([
       'field_name' => 'field_worm_state',
       'entity_type' => 'media',
-      'type' => 'string',
-      'cardinality' => 1,
+      'type' => 'list_string',
+      'cardinality' => -1,  // Unlimited - allows multiple states
+      'settings' => [
+        'allowed_values' => [
+          'cold' => t('kalt'),
+          'hot' => t('heiß'),
+          'dry' => t('trocken'),
+          'wet' => t('nass'),
+          'hungry' => t('hungrig'),
+          'happy' => t('happy'),
+          'cnhigh' => t('CN hoch'),
+          'cnlow' => t('CN niedrig'),
+        ],
+      ],
     ])->save();
     \Drupal::logger('wormchat')->info('Created field storage: field_worm_state');
   }
@@ -232,33 +244,9 @@ function _wormchat_create_fields() {
     ]);
     $field_config->save();
     \Drupal::logger('wormchat')->info('Created field config: field_worm_food_image');
-    
-    // ===== CONFIGURE FORM DISPLAY (widget) =====
-    \Drupal::service('entity_display.repository')->getFormDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_worm_food_image', [
-        'type' => 'image_image',
-        'weight' => 0,
-        'settings' => [
-          'preview_image_style' => 'thumbnail',
-          'progress_indicator' => 'throbber',
-        ],
-      ])
-      ->save();
-    
-    // ===== CONFIGURE VIEW DISPLAY =====
-    \Drupal::service('entity_display.repository')->getViewDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_worm_food_image', [
-        'type' => 'image',
-        'weight' => 0,
-        'label' => 'above',
-        'settings' => [
-          'image_style' => 'medium',
-        ],
-      ])
-      ->save();
   }
 
-  // =====  Field config: field_food_id =====
+  // Field config: field_food_id
   if (!\Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_food', 'field_food_id')) {
     $field_config = \Drupal\field\Entity\FieldConfig::create([
       'field_name' => 'field_food_id',
@@ -270,29 +258,9 @@ function _wormchat_create_fields() {
     ]);
     $field_config->save();
     \Drupal::logger('wormchat')->info('Created field config: field_food_id');
-    
-    // ===== CONFIGURE FORM DISPLAY (widget) =====
-    \Drupal::service('entity_display.repository')->getFormDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_food_id', [
-        'type' => 'string_textfield',
-        'weight' => 1,
-        'settings' => [
-          'size' => 60,
-        ],
-      ])
-      ->save();
-    
-    // ===== CONFIGURE VIEW DISPLAY =====
-    \Drupal::service('entity_display.repository')->getViewDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_food_id', [
-        'type' => 'string',
-        'weight' => 1,
-        'label' => 'above',
-      ])
-      ->save();
   }
 
-  // =====  Field config: field_food_name =====
+  // Field config: field_food_name
   if (!\Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_food', 'field_food_name')) {
     $field_config = \Drupal\field\Entity\FieldConfig::create([
       'field_name' => 'field_food_name',
@@ -304,29 +272,9 @@ function _wormchat_create_fields() {
     ]);
     $field_config->save();
     \Drupal::logger('wormchat')->info('Created field config: field_food_name');
-    
-    // ===== CONFIGURE FORM DISPLAY (widget) =====
-    \Drupal::service('entity_display.repository')->getFormDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_food_name', [
-        'type' => 'string_textfield',
-        'weight' => 2,
-        'settings' => [
-          'size' => 60,
-        ],
-      ])
-      ->save();
-    
-    // ===== CONFIGURE VIEW DISPLAY =====
-    \Drupal::service('entity_display.repository')->getViewDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_food_name', [
-        'type' => 'string',
-        'weight' => 2,
-        'label' => 'above',
-      ])
-      ->save();
   }
 
-  // ===== field_food_color config =====
+  // Field config: field_food_color
   if (!\Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_food', 'field_food_color')) {
     $field_config = \Drupal\field\Entity\FieldConfig::create([
       'field_name' => 'field_food_color',
@@ -338,27 +286,9 @@ function _wormchat_create_fields() {
     ]);
     $field_config->save();
     \Drupal::logger('wormchat')->info('Created field config: field_food_color');
-    
-    // ===== CONFIGURE FORM DISPLAY (widget) =====
-    \Drupal::service('entity_display.repository')->getFormDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_food_color', [
-        'type' => 'options_select',
-        'weight' => 3,
-        'settings' => [],
-      ])
-      ->save();
-    
-    // ===== CONFIGURE VIEW DISPLAY =====
-    \Drupal::service('entity_display.repository')->getViewDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_food_color', [
-        'type' => 'list_default',
-        'weight' => 3,
-        'label' => 'above',
-      ])
-      ->save();
   }
 
-  // ===== ADD NEW FIELD CONFIG: Category =====
+  // Field config: field_food_category
   if (!\Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_food', 'field_food_category')) {
     $field_config = \Drupal\field\Entity\FieldConfig::create([
       'field_name' => 'field_food_category',
@@ -370,27 +300,9 @@ function _wormchat_create_fields() {
     ]);
     $field_config->save();
     \Drupal::logger('wormchat')->info('Created field config: field_food_category');
-    
-    // ===== CONFIGURE FORM DISPLAY (widget) =====
-    \Drupal::service('entity_display.repository')->getFormDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_food_category', [
-        'type' => 'options_select',
-        'weight' => 3,
-        'settings' => [],
-      ])
-      ->save();
-    
-    // ===== CONFIGURE VIEW DISPLAY =====
-    \Drupal::service('entity_display.repository')->getViewDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_food_category', [
-        'type' => 'list_default',
-        'weight' => 3,
-        'label' => 'above',
-      ])
-      ->save();
   }
 
-  // Field config: field_food_metadata (keep for backward compatibility)
+  // Field config: field_food_metadata
   if (!\Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_food', 'field_food_metadata')) {
     $field_config = \Drupal\field\Entity\FieldConfig::create([
       'field_name' => 'field_food_metadata',
@@ -402,27 +314,93 @@ function _wormchat_create_fields() {
     ]);
     $field_config->save();
     \Drupal::logger('wormchat')->info('Created field config: field_food_metadata');
-    
-    // ===== CONFIGURE FORM DISPLAY (widget) =====
-    \Drupal::service('entity_display.repository')->getFormDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_food_metadata', [
-        'type' => 'string_textarea',
-        'weight' => 4,
-        'settings' => [
-          'rows' => 4,
-        ],
-      ])
-      ->save();
-    
-    // ===== CONFIGURE VIEW DISPLAY =====
-    \Drupal::service('entity_display.repository')->getViewDisplay('media', 'worm_food', 'default')
-      ->setComponent('field_food_metadata', [
-        'type' => 'string',
-        'weight' => 4,
-        'label' => 'above',
-      ])
-      ->save();
   }
+
+  // ===== CONFIGURE ALL FORM DISPLAYS AT ONCE =====
+  $form_display = \Drupal::service('entity_display.repository')->getFormDisplay('media', 'worm_food', 'default');
+  
+  $form_display->setComponent('field_worm_food_image', [
+      'type' => 'image_image',
+      'weight' => 0,
+      'settings' => [
+        'preview_image_style' => 'thumbnail',
+        'progress_indicator' => 'throbber',
+      ],
+    ])
+    ->setComponent('field_food_id', [
+      'type' => 'string_textfield',
+      'weight' => 1,
+      'settings' => [
+        'size' => 60,
+      ],
+    ])
+    ->setComponent('field_food_name', [
+      'type' => 'string_textfield',
+      'weight' => 2,
+      'settings' => [
+        'size' => 60,
+      ],
+    ])
+    ->setComponent('field_food_color', [
+      'type' => 'options_select',
+      'weight' => 3,
+      'settings' => [],
+    ])
+    ->setComponent('field_food_category', [
+      'type' => 'options_select',
+      'weight' => 4,
+      'settings' => [],
+    ])
+    ->setComponent('field_food_metadata', [
+      'type' => 'string_textarea',
+      'weight' => 5,
+      'settings' => [
+        'rows' => 4,
+      ],
+    ])
+    ->save();
+
+  \Drupal::logger('wormchat')->info('Configured form display for worm_food');
+
+  // ===== CONFIGURE ALL VIEW DISPLAYS AT ONCE =====
+  $view_display = \Drupal::service('entity_display.repository')->getViewDisplay('media', 'worm_food', 'default');
+  
+  $view_display->setComponent('field_worm_food_image', [
+      'type' => 'image',
+      'weight' => 0,
+      'label' => 'above',
+      'settings' => [
+        'image_style' => 'medium',
+      ],
+    ])
+    ->setComponent('field_food_id', [
+      'type' => 'string',
+      'weight' => 1,
+      'label' => 'above',
+    ])
+    ->setComponent('field_food_name', [
+      'type' => 'string',
+      'weight' => 2,
+      'label' => 'above',
+    ])
+    ->setComponent('field_food_color', [
+      'type' => 'list_default',
+      'weight' => 3,
+      'label' => 'above',
+    ])
+    ->setComponent('field_food_category', [
+      'type' => 'list_default',
+      'weight' => 4,
+      'label' => 'above',
+    ])
+    ->setComponent('field_food_metadata', [
+      'type' => 'string',
+      'weight' => 5,
+      'label' => 'above',
+    ])
+    ->save();
+
+  \Drupal::logger('wormchat')->info('Configured view display for worm_food');
 }
 
 /**
@@ -445,64 +423,26 @@ function _wormchat_create_video_fields() {
     ]);
     $field_config->save();
     \Drupal::logger('wormchat')->info('Created field config: field_worm_state_video_file');
-    
-    // ===== CONFIGURE FORM DISPLAY (widget) =====
-    \Drupal::service('entity_display.repository')->getFormDisplay('media', 'worm_state_video', 'default')
-      ->setComponent('field_worm_state_video_file', [
-        'type' => 'file_generic',
-        'weight' => 0,
-        'settings' => [],
-      ])
-      ->save();
-    
-    // ===== CONFIGURE VIEW DISPLAY =====
-    \Drupal::service('entity_display.repository')->getViewDisplay('media', 'worm_state_video', 'default')
-      ->setComponent('field_worm_state_video_file', [
-        'type' => 'file_default',
-        'weight' => 0,
-        'label' => 'above',
-      ])
-      ->save();
-    
-    \Drupal::logger('wormchat')->info('Configured display for field_worm_state_video_file');
   }
 
   // Field config: field_worm_state
-  if (!\Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_state_video', 'field_worm_state')) {
-    $field_config = \Drupal\field\Entity\FieldConfig::create([
+  $field_worm_state = \Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_state_video', 'field_worm_state');
+  
+  if (!$field_worm_state) {
+    $field_worm_state = \Drupal\field\Entity\FieldConfig::create([
       'field_name' => 'field_worm_state',
       'entity_type' => 'media',
       'bundle' => 'worm_state_video',
-      'label' => 'Worm State',
+      'label' => 'Worm States',
       'required' => TRUE,
-      'description' => 'State of the worm (e.g., hot, cold, dry, wet, hungry, etc)',
       'settings' => [],
     ]);
-    $field_config->save();
-    \Drupal::logger('wormchat')->info('Created field config: field_worm_state');
-    
-    // ===== CONFIGURE FORM DISPLAY (widget) =====
-    \Drupal::service('entity_display.repository')->getFormDisplay('media', 'worm_state_video', 'default')
-      ->setComponent('field_worm_state', [
-        'type' => 'string_textfield',
-        'weight' => 1,
-        'settings' => [
-          'size' => 60,
-        ],
-      ])
-      ->save();
-    
-    // ===== CONFIGURE VIEW DISPLAY =====
-    \Drupal::service('entity_display.repository')->getViewDisplay('media', 'worm_state_video', 'default')
-      ->setComponent('field_worm_state', [
-        'type' => 'string',
-        'weight' => 1,
-        'label' => 'above',
-      ])
-      ->save();
-    
-    \Drupal::logger('wormchat')->info('Configured display for field_worm_state');
   }
+  
+  // Always update the description (even if field already exists)
+  $field_worm_state->setDescription('Gib an, beim welchem Zustand dieses Video abgespielt werden soll. Mögliche Werte sind: dry, wet, hot, cold, hungry, cnLow, cnHigh, happy. Wenn das Video für einen kombinierten Zustand ist, verbinde die Zustände mit _ : cold_dry');
+  $field_worm_state->save();
+  \Drupal::logger('wormchat')->info('Created/updated field config: field_worm_state');
 
   // Field config: field_worm_state_description
   if (!\Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_state_video', 'field_worm_state_description')) {
@@ -510,35 +450,76 @@ function _wormchat_create_video_fields() {
       'field_name' => 'field_worm_state_description',
       'entity_type' => 'media',
       'bundle' => 'worm_state_video',
-      'label' => 'State Description',
+      'label' => 'Video Beschreibung',
       'required' => FALSE,
-      'description' => 'Detailed description of what this video shows (optional)',
+      'description' => 'Beschreibung, was das Video zeigt (optional)',
     ]);
     $field_config->save();
     \Drupal::logger('wormchat')->info('Created field config: field_worm_state_description');
-    
-    // ===== CONFIGURE FORM DISPLAY (widget) =====
-    \Drupal::service('entity_display.repository')->getFormDisplay('media', 'worm_state_video', 'default')
-      ->setComponent('field_worm_state_description', [
-        'type' => 'string_textarea',
-        'weight' => 2,
-        'settings' => [
-          'rows' => 4,
-        ],
-      ])
-      ->save();
-    
-    // ===== CONFIGURE VIEW DISPLAY =====
-    \Drupal::service('entity_display.repository')->getViewDisplay('media', 'worm_state_video', 'default')
-      ->setComponent('field_worm_state_description', [
-        'type' => 'string',
-        'weight' => 2,
-        'label' => 'above',
-      ])
-      ->save();
-    
-    \Drupal::logger('wormchat')->info('Configured display for field_worm_state_description');
   }
+
+  // ===== CONFIGURE FORM DISPLAY (ALL FIELDS AT ONCE) =====
+  // Load existing form display or create new one
+  $form_display = \Drupal::service('entity_display.repository')->getFormDisplay('media', 'worm_state_video', 'default');
+  if (!$form_display) {
+    $form_display = \Drupal\core\Entity\Entity\EntityFormDisplay::create([
+      'targetEntityType' => 'media',
+      'bundle' => 'worm_state_video',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+  
+  $form_display->setComponent('field_worm_state', [
+    'type' => 'options_buttons',  // Checkboxes
+    'weight' => 0,
+    'settings' => [],
+  ])
+  ->setComponent('field_worm_state_video_file', [
+    'type' => 'file_generic',
+    'weight' => 1,
+    'settings' => [],
+  ])
+  ->setComponent('field_worm_state_description', [
+    'type' => 'string_textarea',
+    'weight' => 2,
+    'settings' => [
+      'rows' => 4,
+    ],
+  ])
+  ->save();
+
+  \Drupal::logger('wormchat')->info('Configured form display for worm_state_video');
+
+  // ===== CONFIGURE VIEW DISPLAY (ALL FIELDS AT ONCE) =====
+  $view_display = \Drupal::service('entity_display.repository')->getViewDisplay('media', 'worm_state_video', 'default');
+  if (!$view_display) {
+    $view_display = \Drupal\core\Entity\Entity\EntityViewDisplay::create([
+      'targetEntityType' => 'media',
+      'bundle' => 'worm_state_video',
+      'mode' => 'default',
+      'status' => TRUE,
+    ]);
+  }
+  
+  $view_display->setComponent('field_worm_state', [
+    'type' => 'list_default',
+    'weight' => 0,
+    'label' => 'above',
+  ])
+  ->setComponent('field_worm_state_video_file', [
+    'type' => 'file_default',
+    'weight' => 1,
+    'label' => 'above',
+  ])
+  ->setComponent('field_worm_state_description', [
+    'type' => 'string',
+    'weight' => 2,
+    'label' => 'above',
+  ])
+  ->save();
+
+  \Drupal::logger('wormchat')->info('Configured view display for worm_state_video');
 }
 
 /**
@@ -554,7 +535,9 @@ function _wormchat_create_directories() {
 
 /**
  * Create directories for worm videos.
- * Videos are stored in public://worm/videos/ (translates to /web/sites/default/files/worm/videos/)
+ * Videos are stored in public://worm/videos/ with subdirectories for each state or state combination
+ * Folder naming: {state1}_{state2} for combinations, or just {state} for single states
+ * Exception: 'happy' cannot be combined with anything and can only exist alone
  */
 function _wormchat_create_video_directories() {
   // Create main worm directory
@@ -569,6 +552,51 @@ function _wormchat_create_video_directories() {
   if (!is_dir($videos_dir)) {
     mkdir($videos_dir, 0755, TRUE);
     \Drupal::logger('wormchat')->info('Created directory: @dir', ['@dir' => $videos_dir]);
+  }
+
+  // Single state directories
+  $single_states = ['cold', 'hot', 'dry', 'wet', 'hungry', 'happy', 'cnhigh', 'cnlow'];
+  
+  // State combination directories (2 states)
+  // Excluding mutually exclusive pairs: cold+hot, dry+wet, cnhigh+cnlow
+  // Excluding happy (cannot be combined)
+  $combinations = [
+    'cold_dry',
+    'cold_wet',
+    'cold_hungry',
+    'cold_cnhigh',
+    'cold_cnlow',
+    'hot_dry',
+    'hot_wet',
+    'hot_hungry',
+    'hot_cnhigh',
+    'hot_cnlow',
+    'dry_hungry',
+    'dry_cnhigh',
+    'dry_cnlow',
+    'wet_hungry',
+    'wet_cnhigh',
+    'wet_cnlow',
+    'hungry_cnhigh',
+    'hungry_cnlow',
+  ];
+
+  // Create all single-state directories
+  foreach ($single_states as $state) {
+    $state_dir = 'public://worm/videos/' . $state;
+    if (!is_dir($state_dir)) {
+      mkdir($state_dir, 0755, TRUE);
+      \Drupal::logger('wormchat')->info('Created state directory: @dir', ['@dir' => $state_dir]);
+    }
+  }
+
+  // Create all combination directories
+  foreach ($combinations as $combination) {
+    $combination_dir = 'public://worm/videos/' . $combination;
+    if (!is_dir($combination_dir)) {
+      mkdir($combination_dir, 0755, TRUE);
+      \Drupal::logger('wormchat')->info('Created combination directory: @dir', ['@dir' => $combination_dir]);
+    }
   }
 }
 
@@ -692,9 +720,10 @@ function wormchat_uninstall() {
     ->execute();
 
   if ($media_ids) {
-    $media_storage = \Drupal::entityTypeManager()->getStorage('media');
-    $medias = $media_storage->loadMultiple($media_ids);
-    $media_storage->delete($medias);
+    $storage = \Drupal::entityTypeManager()->getStorage('media');
+    $entities = $storage->loadMultiple($media_ids);
+    $storage->delete($entities);
+    \Drupal::logger('wormchat')->info('Deleted @count worm_food media entities', ['@count' => count($media_ids)]);
   }
 
   // Delete all worm_state_video media entities
@@ -704,117 +733,9 @@ function wormchat_uninstall() {
     ->execute();
 
   if ($video_ids) {
-    $media_storage = \Drupal::entityTypeManager()->getStorage('media');
-    $videos = $media_storage->loadMultiple($video_ids);
-    $media_storage->delete($videos);
+    $storage = \Drupal::entityTypeManager()->getStorage('media');
+    $entities = $storage->loadMultiple($video_ids);
+    $storage->delete($entities);
+    \Drupal::logger('wormchat')->info('Deleted @count worm_state_video media entities', ['@count' => count($video_ids)]);
   }
-
-  // Delete field configs for worm_food
-  $field_image = \Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_food', 'field_worm_food_image');
-  if ($field_image) {
-    $field_image->delete();
-  }
-
-  // ===== Delete new food fields =====
-  $field_id = \Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_food', 'field_food_id');
-  if ($field_id) {
-    $field_id->delete();
-  }
-
-  $field_name = \Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_food', 'field_food_name');
-  if ($field_name) {
-    $field_name->delete();
-  }
-
-  $field_color = \Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_food', 'field_food_color');
-  if ($field_color) {
-    $field_color->delete();
-  }
-
-  $field_category = \Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_food', 'field_food_category');
-  if ($field_category) {
-    $field_category->delete();
-  }
-
-  $field_metadata = \Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_food', 'field_food_metadata');
-  if ($field_metadata) {
-    $field_metadata->delete();
-  }
-
-  // Delete field configs for worm_state_video
-  $video_file_field = \Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_state_video', 'field_worm_state_video_file');
-  if ($video_file_field) {
-    $video_file_field->delete();
-  }
-
-  $video_state_field = \Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_state_video', 'field_worm_state');
-  if ($video_state_field) {
-    $video_state_field->delete();
-  }
-
-  $video_desc_field = \Drupal\field\Entity\FieldConfig::loadByName('media', 'worm_state_video', 'field_worm_state_description');
-  if ($video_desc_field) {
-    $video_desc_field->delete();
-  }
-
-  // Delete field storage for worm_food
-  $storage_image = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_worm_food_image');
-  if ($storage_image) {
-    $storage_image->delete();
-  }
-
-  $storage_metadata = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_food_metadata');
-  if ($storage_metadata) {
-    $storage_metadata->delete();
-  }
-
-  // =====  Delete new food field storages =====
-  $storage_id = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_food_id');
-  if ($storage_id) {
-    $storage_id->delete();
-  }
-
-  $storage_name = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_food_name');
-  if ($storage_name) {
-    $storage_name->delete();
-  }
-
-  $storage_color = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_food_color');
-  if ($storage_color) {
-    $storage_color->delete();
-  }
-
-  $storage_category = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_food_category');
-  if ($storage_category) {
-    $storage_category->delete();
-  }
-
-  // Delete field storage for worm_state_video
-  $storage_video_file = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_worm_state_video_file');
-  if ($storage_video_file) {
-    $storage_video_file->delete();
-  }
-
-  $storage_video_state = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_worm_state');
-  if ($storage_video_state) {
-    $storage_video_state->delete();
-  }
-
-  $storage_video_desc = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_worm_state_description');
-  if ($storage_video_desc) {
-    $storage_video_desc->delete();
-  }
-
-  // Delete media types
-  $media_type_food = \Drupal\media\Entity\MediaType::load('worm_food');
-  if ($media_type_food) {
-    $media_type_food->delete();
-  }
-
-  $media_type_video = \Drupal\media\Entity\MediaType::load('worm_state_video');
-  if ($media_type_video) {
-    $media_type_video->delete();
-  }
-
-  \Drupal::logger('wormchat')->info('Worm Chat module uninstalled');
 }

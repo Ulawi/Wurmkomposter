@@ -92,8 +92,9 @@ function wormchat_user_login(\Drupal\user\UserInterface $account) {
 
 /**
  * Implements hook_form_alter().
- * Adds validation to worm_food media forms to prevent duplicate food IDs.
- * Pre-fills metadata textarea with template for new/edited items.
+ * - Adds validation to worm_food media forms to prevent duplicate food IDs
+ * - Pre-fills metadata textarea with template for new/edited items
+ * - Handles worm_state_video upload: validates media name uniqueness, ensures state folder exists
  */
 function wormchat_form_alter(&$form, &$form_state, $form_id) {
   // Target the media edit form for worm_food bundle
@@ -110,6 +111,160 @@ function wormchat_form_alter(&$form, &$form_state, $form_id) {
       $form['field_food_id']['widget'][0]['value']['#disabled'] = TRUE;
       \Drupal::messenger()->addMessage(t('Food ID cannot be changed after creation.'), 'info');
     }
+  }
+  
+  // Target the media form for worm_state_video bundle
+  if ($form_id === 'media_worm_state_video_edit_form' || $form_id === 'media_worm_state_video_form') {
+    // Add custom validation callback to check media name uniqueness
+    $form['#validate'][] = 'wormchat_validate_video_name_unique';
+  }
+}
+
+/**
+ * Custom validation callback for worm state video name uniqueness.
+ * 
+ * Ensures that the media name (title) is not empty.
+ * If a duplicate name is detected, it will be auto-incremented during save.
+ */
+function wormchat_validate_video_name_unique(&$form, &$form_state) {
+  $video_name = $form_state->getValue('name');
+  
+  if (empty($video_name)) {
+    $form_state->setErrorByName('name', t('Video name is required.'));
+  }
+}
+
+
+/**
+ * Helper function: Get a unique media name by checking if it already exists.
+ * If it exists, appends _{number} suffix until a unique name is found.
+ * 
+ * Example: eating → eating_1 → eating_2
+ * 
+ * @param string $base_name
+ *   The desired media name (e.g., 'eating')
+ * @param int|null $current_media_id
+ *   The current media entity ID (to skip when checking for duplicates)
+ * 
+ * @return string
+ *   The unique media name (possibly with suffix)
+ */
+function _wormchat_get_unique_media_name($base_name, $current_media_id = NULL) {
+  // Query for all worm_state_video entities with this name
+  $existing = \Drupal::entityQuery('media')
+    ->condition('bundle', 'worm_state_video')
+    ->condition('name', $base_name)
+    ->accessCheck(FALSE)
+    ->execute();
+
+  // If no existing media with this name, return the base name
+  if (empty($existing)) {
+    return $base_name;
+  }
+
+  // If only the current entity has this name (editing), return base name
+  if (count($existing) === 1 && $current_media_id && reset($existing) == $current_media_id) {
+    return $base_name;
+  }
+
+  // Name exists - find next available number
+  $counter = 1;
+  while (TRUE) {
+    $candidate_name = $base_name . '_' . $counter;
+    
+    // Check if this candidate already exists
+    $existing = \Drupal::entityQuery('media')
+      ->condition('bundle', 'worm_state_video')
+      ->condition('name', $candidate_name)
+      ->accessCheck(FALSE)
+      ->execute();
+    
+    // If not found, this is our unique name
+    if (empty($existing)) {
+      return $candidate_name;
+    }
+    
+    // If only current entity has it, we can use it
+    if (count($existing) === 1 && $current_media_id && reset($existing) == $current_media_id) {
+      return $candidate_name;
+    }
+    
+    // Try next number
+    $counter++;
+  }
+}
+
+/**
+ * Helper function: Move video file to state-specific subfolder.
+ * 
+ * Moves the file from its temporary location to:
+ * /sites/default/files/worm/videos/{state}/{original_filename}
+ * 
+ * @param \Drupal\file\Entity\File $file
+ *   The file entity to move.
+ * @param string $state
+ *   The worm state (used for subfolder name).
+ */
+function _wormchat_move_file_to_state_folder($file, $state) {
+  if (!$file) {
+    return;
+  }
+  
+  $file_system = \Drupal::service('file_system');
+  $current_uri = $file->getFileUri();
+  
+  // Build the state-specific directory path
+  $state_dir = 'public://worm/videos/' . $state;
+  $state_dir_realpath = $file_system->realpath($state_dir);
+  
+  // Ensure the state directory exists
+  if (!is_dir($state_dir_realpath)) {
+    if (!mkdir($state_dir_realpath, 0755, TRUE)) {
+      \Drupal::logger('wormchat')->error('Failed to create state directory: @dir', ['@dir' => $state_dir_realpath]);
+      return;
+    }
+  }
+  
+  // Get the original filename
+  $filename = $file->getFilename();
+  
+  // Build the target URI
+  $target_uri = $state_dir . '/' . $filename;
+  
+  // Check if we need to move the file
+  if ($current_uri === $target_uri) {
+    // Already in the right location
+    return;
+  }
+  
+  // Get real paths for actual file operations
+  $current_path = $file_system->realpath($current_uri);
+  $target_path = $file_system->realpath($state_dir) . '/' . $filename;
+  
+  // Move the physical file
+  try {
+    if (!file_exists($current_path)) {
+      \Drupal::logger('wormchat')->error('Source file does not exist: @file', ['@file' => $current_path]);
+      return;
+    }
+    
+    // Rename/move the physical file
+    if (!rename($current_path, $target_path)) {
+      \Drupal::logger('wormchat')->error('Failed to move physical file from @from to @to', 
+        ['@from' => $current_path, '@to' => $target_path]);
+      return;
+    }
+    
+    // Update the file entity URI
+    $file->setFileUri($target_uri);
+    $file->save();
+    
+    \Drupal::logger('wormchat')->info('Moved video file for state @state: @file', 
+      ['@state' => $state, '@file' => $filename]);
+  } catch (\Exception $e) {
+    \Drupal::logger('wormchat')->error('Failed to move video file for state @state: @error', 
+      ['@state' => $state, '@error' => $e->getMessage()]);
+    \Drupal::messenger()->addError(t('Failed to organize video file. Please try again.'));
   }
 }
 
@@ -198,53 +353,78 @@ function wormchat_validate_food_id_unique(&$form, &$form_state) {
 
 /**
  * Implements hook_entity_presave().
- * When a worm_food media is saved, create/update JSON file in assets/foods directory.
+ * - When a worm_food media is saved, create/update JSON file in assets/foods directory.
+ * - When a worm_state_video is saved, auto-increment name if duplicate and move file to state folder.
  */
 function wormchat_entity_presave(EntityInterface $entity) {
-  if ($entity->getEntityTypeId() !== 'media' || $entity->bundle() !== 'worm_food') {
+  if ($entity->getEntityTypeId() !== 'media') {
     return;
   }
 
-  // Get the field values
-  $food_id = $entity->get('field_food_id')->value ?? NULL;
-  $food_name = $entity->get('field_food_name')->value ?? NULL;
-  $food_color = $entity->get('field_food_color')->value ?? NULL;
-  $food_category = $entity->get('field_food_category')->value ?? NULL;
-  $metadata_json = $entity->get('field_food_metadata')->value ?? '{}';
+  // Handle worm_food media
+  if ($entity->bundle() === 'worm_food') {
+    // Get the field values
+    $food_id = $entity->get('field_food_id')->value ?? NULL;
+    $food_name = $entity->get('field_food_name')->value ?? NULL;
+    $food_color = $entity->get('field_food_color')->value ?? NULL;
+    $food_category = $entity->get('field_food_category')->value ?? NULL;
+    $metadata_json = $entity->get('field_food_metadata')->value ?? '{}';
 
-  // Validate mandatory fields
-  if (!$food_id || !$food_name || !$food_color || !$food_category) {
-    \Drupal::logger('wormchat')->warning('Cannot create JSON: Missing mandatory fields for @food_id', 
-      ['@food_id' => $food_id ?? 'unknown']);
-    return;
+    // Validate mandatory fields
+    if (!$food_id || !$food_name || !$food_color || !$food_category) {
+      \Drupal::logger('wormchat')->warning('Cannot create JSON: Missing mandatory fields for @food_id', 
+        ['@food_id' => $food_id ?? 'unknown']);
+      return;
+    }
+
+    // Parse metadata JSON
+    $metadata = json_decode($metadata_json, TRUE) ?? [];
+
+    // Build complete food data structure
+    $food_data = [
+      'id' => $food_id,
+      'name' => $food_name,
+      'color' => $food_color,
+      'category' => $food_category,
+      'moisture' => $metadata['moisture'] ?? '',
+      'decomposition_speed' => $metadata['decomposition_speed'] ?? '',
+      'nutrient_profile' => $metadata['nutrient_profile'] ?? '',
+      'sensor_fingerprint' => $metadata['sensor_fingerprint'] ?? [
+        'smell' => '',
+        'temperature_change' => '',
+        'pH_effect' => '',
+        'moisture_effect' => '',
+      ],
+      'user_guidance' => $metadata['user_guidance'] ?? [
+        'do' => [],
+        'dont' => [],
+      ],
+    ];
+
+    // Write JSON file to assets/foods directory
+    _wormchat_write_food_json($food_id, $food_data);
   }
 
-  // Parse metadata JSON
-  $metadata = json_decode($metadata_json, TRUE) ?? [];
+  // Handle worm_state_video media
+  if ($entity->bundle() === 'worm_state_video') {
+    $state = $entity->get('field_worm_state')->value;
+    $media_name = $entity->label();
 
-  // Build complete food data structure
-  $food_data = [
-    'id' => $food_id,
-    'name' => $food_name,
-    'color' => $food_color,
-    'category' => $food_category,
-    'moisture' => $metadata['moisture'] ?? '',
-    'decomposition_speed' => $metadata['decomposition_speed'] ?? '',
-    'nutrient_profile' => $metadata['nutrient_profile'] ?? '',
-    'sensor_fingerprint' => $metadata['sensor_fingerprint'] ?? [
-      'smell' => '',
-      'temperature_change' => '',
-      'pH_effect' => '',
-      'moisture_effect' => '',
-    ],
-    'user_guidance' => $metadata['user_guidance'] ?? [
-      'do' => [],
-      'dont' => [],
-    ],
-  ];
+    if (!$state || !$media_name) {
+      \Drupal::logger('wormchat')->warning('Cannot organize video: missing state or name');
+      return;
+    }
 
-  // Write JSON file to assets/foods directory
-  _wormchat_write_food_json($food_id, $food_data);
+    // Check if media name is unique, auto-increment if needed
+    $unique_name = _wormchat_get_unique_media_name($media_name, $entity->id());
+
+    if ($unique_name !== $media_name) {
+      // Name was auto-incremented - update the entity BEFORE it's saved
+      $entity->setName($unique_name);
+      \Drupal::logger('wormchat')->info('Media name auto-incremented: @old → @new', 
+        ['@old' => $media_name, '@new' => $unique_name]);
+    }
+  }
 }
 
 /**
@@ -277,5 +457,56 @@ function _wormchat_write_food_json($food_id, $food_data) {
     \Drupal::logger('wormchat')->info('Created/updated food JSON: @file', ['@file' => $json_file]);
   } else {
     \Drupal::logger('wormchat')->error('Failed to write food JSON: @file', ['@file' => $json_file]);
+  }
+}
+
+/**
+ * Implements hook_entity_insert().
+ * After a worm_state_video media is inserted, move the file to the state-specific folder.
+ */
+function wormchat_entity_insert(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() !== 'media' || $entity->bundle() !== 'worm_state_video') {
+    return;
+  }
+
+  $state = $entity->get('field_worm_state')->value;
+  $video_file = $entity->get('field_worm_state_video_file')->entity;
+
+  if (!$state || !$video_file) {
+    \Drupal::logger('wormchat')->warning('Cannot move video file: missing state or file');
+    return;
+  }
+
+  // Move file to state-specific subdirectory (after entity is saved)
+  _wormchat_move_file_to_state_folder($video_file, strtolower($state));
+}
+
+/**
+ * Implements hook_entity_delete().
+ * When a worm_state_video media is deleted, delete the physical video file from filesystem.
+ */
+function wormchat_entity_delete(EntityInterface $entity) {
+  if ($entity->getEntityTypeId() !== 'media' || $entity->bundle() !== 'worm_state_video') {
+    return;
+  }
+
+  $video_file = $entity->get('field_worm_state_video_file')->entity;
+  
+  if (!$video_file) {
+    return;
+  }
+
+  // Get the file path
+  $file_system = \Drupal::service('file_system');
+  $file_uri = $video_file->getFileUri();
+  $file_path = $file_system->realpath($file_uri);
+
+  // Delete the physical file from filesystem
+  if (file_exists($file_path)) {
+    if (unlink($file_path)) {
+      \Drupal::logger('wormchat')->info('Deleted video file: @file', ['@file' => $file_path]);
+    } else {
+      \Drupal::logger('wormchat')->error('Failed to delete video file: @file', ['@file' => $file_path]);
+    }
   }
 }

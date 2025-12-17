@@ -90,7 +90,7 @@
     }
     
     return {
-      video: `/sites/default/files/worm/${stateKey}.mp4`,
+      video: `/sites/default/files/worm/videos/${stateKey}.mp4`,
       thought: `/sites/default/files/pictures/${stateKey}`  // Without extension - resolver will add .png or .jpg
     };
   }

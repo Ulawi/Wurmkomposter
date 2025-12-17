@@ -20,7 +20,7 @@ class WormVideoController extends ControllerBase {
    *   JSON response with video data or error.
    */
   public function getVideoByState($state) {
-    $video_data = wormchat_get_video_data($state);
+    $video_data = \wormchat_get_video_data($state);
 
     if (!$video_data) {
       return new JsonResponse(
@@ -39,7 +39,7 @@ class WormVideoController extends ControllerBase {
    *   JSON response with all videos keyed by state.
    */
   public function getAllVideos() {
-    $videos = wormchat_get_all_videos();
+    $videos = \wormchat_get_all_videos();
 
     if (empty($videos)) {
       return new JsonResponse(
@@ -104,7 +104,7 @@ class WormVideoController extends ControllerBase {
       );
     }
 
-    $video_url = wormchat_get_random_video_by_state($state);
+    $video_url = \wormchat_get_random_video_by_state($state);
 
     if (!$video_url) {
       return new JsonResponse(

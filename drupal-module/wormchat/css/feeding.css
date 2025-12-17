@@ -1,22 +1,37 @@
-/* WRAPPER */
+/* WRAPPER - RESPONSIVE */
 .worm-feeding-wrapper {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 1rem;
-  min-height: 100vh;  /* ===== Use full viewport height ===== */
+  padding: 0.75rem;  /* Reduced padding on mobile */
+  min-height: 100vh;  /* Use full viewport height */
 }
 
-/* COLOR CATEGORIES ROW */
+/* Increase padding on larger screens */
+@media (min-width: 576px) {
+  .worm-feeding-wrapper {
+    padding: 1rem;
+  }
+}
+
+/* COLOR CATEGORIES ROW - RESPONSIVE */
 .color-categories-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.5rem;  /* Reduced gap on mobile */
   justify-content: center;
   align-items: center;
-  padding: 1rem;
+  padding: 0.75rem;  /* Reduced padding on mobile */
   margin-bottom: 1rem;
   border-radius: 0.5rem;
+}
+
+/* Increase padding on larger screens */
+@media (min-width: 576px) {
+  .color-categories-row {
+    gap: 0.75rem;
+    padding: 1rem;
+  }
 }
 
 /* ===== COLOR CUSTOM PROPERTIES (set by JavaScript) ===== */
@@ -291,7 +306,7 @@
   -webkit-user-drag: none;
 }
 
-/* CHOP ACTION - NOW IN SAME ROW AS CHOPPING BOARD */
+/* CHOP ACTION - NOW IN SAME ROW AS CHOPPING BOARD (RESPONSIVE) */
 .chop-action {
   display: flex;
   justify-content: center;
@@ -299,17 +314,23 @@
   margin: 0;
   padding: 0;
   flex-shrink: 0;
-  width: 100%;  
-  height: 100%; 
+  width: 100%;
+  height: 100%;
+  min-height: 100px;
+  
+  /* On mobile, ensure knife is visible */
+  @media (max-width: 575px) {
+    min-height: 120px;
+  }
 }
 
 #chopBtn {
-  width: 90%;  /* =====  Use 90% of column width ===== */
-  height: auto;  /* ===== Let aspect ratio determine height ===== */
+  width: 80%;  /* Use 80% of container width */
+  height: auto;  /* Let aspect ratio determine height */
+  max-width: 120px;
   cursor: grab;
   border-radius: 0.375rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/  /* commented out box-shadow for consistency*/
   /* ===== TOUCH SUPPORT - ALLOW TOUCH DRAGGING ===== */
   touch-action: none;
   -webkit-user-select: none;
@@ -331,57 +352,91 @@
   opacity: 0.7;
 }
 
-/* CHOPPING ROW: Board + Knife */
-.chopping-row {
-  display: flex;
-  gap: 1rem;
+/* BOARD ROW: 100% width */
+.board-row {
   margin-bottom: 1rem;
-  flex: 1;  /* =====  Use available vertical space ===== */
-  min-height: 400px;  /* =====  Increased height for chopping board ===== */
+  flex: 0;
+}
+
+/* CONTROLS ROW: Knife (20%) • Cups + Done (80%) */
+.controls-row {
+  flex: 1;  /* Take remaining space */
+  gap: 1rem !important;
+  margin-top: 1rem;
+}
+
+.chop-action {
+  min-height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.cups-and-done-row {
+  min-height: 80px;
+}
+
+.cups-container {
+  flex-shrink: 0;
+}
+
+/* CHOPPING ROW: Board + Knife - RESPONSIVE (DEPRECATED - keeping for reference) */
+.chopping-row {
+  display: none;  /* Replaced by board-row and controls-row */
 }
 
 .chopping-column {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: none;  /* Replaced by Bootstrap grid */
 }
 
 .chopping-column-main {
-  flex: 0 0 75%;  /* ===== Column 1: 75% width ===== */
+  display: none;
 }
 
 .chopping-column-secondary {
-  flex: 0 0 25%;  /* ===== Column 2: 25% width ===== */
-  padding: 1rem;
+  display: none;
 }
 
-/* ===== CUPS ROW: Cups + Feeding Done ===== */
-.cups-row {
+/* CHOPPING BOARD */
+.chopping-board {
   display: flex;
-  gap: 1rem;
-  height: auto;
-  min-height: 80px;  /* ===== Minimum height to match button =====  */
-  margin-top: auto;  /* =====  Push to bottom ===== */
-  padding-top: 1rem;  /* ===== Visual separation from chopping row ===== */
+  justify-content: center;
+  align-items: center;
+  aspect-ratio: 2 / 1;
+  background-color: #ffffff;
+  background-image: url('../images/choppingboard.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-attachment: scroll;
+  position: relative;
+  z-index: 5;
+  flex: 1;
+  min-height: 200px;
+  width: 100%;  /* Full width */
+  
+  /* On mobile, ensure it's visible */
+  @media (max-width: 575px) {
+    min-height: 250px;
+  }
+}
+
+/* ===== CUPS ROW: Cups + Feeding Done - DEPRECATED (keeping for reference) ===== */
+.cups-row {
+  display: none;  /* Replaced by controls-row */
 }
 
 .cups-column {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
+  display: none;  /* Replaced by Bootstrap grid */
 }
 
 .cups-column-main {
-  flex: 0 0 75%;  /* ===== Column 1: 75% width (same as chopping row) ===== */
-  flex-wrap: wrap;
-  padding: 0.5rem;
-  background-color: #ffffff;
+  display: none;
 }
 
 .cups-column-secondary {
-  flex: 0 0 25%;  /* ===== Column 2: 25% width (same as chopping row) ===== */
-  padding: 0.5rem;
+  display: none;
 }
 
 .cup {
