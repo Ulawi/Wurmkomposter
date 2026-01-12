@@ -23,7 +23,7 @@ Visit: `http://your-site.de/admin/content/media`
 ### 4. Select "Worm State Video"
 
 ### 5. Upload & Fill Form
-- **Video File:** Upload `healthy_worm.mp4`
+- **Video File:** Upload `my_worm.mp4`
 - **Worm State:** `dry` (or wet, hot, cold, hungry, cnLow, cnHigh, satt, dry+hot, dry+cold, dry+hungry, ..., happy)
 - **Description:** "Wurm erklärt, welches Futter den CN wert hebt." (optional)
 

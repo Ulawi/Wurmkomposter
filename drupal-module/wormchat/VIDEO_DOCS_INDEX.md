@@ -8,8 +8,6 @@
 ### 📚 **I want complete documentation**
 → Read: **[VIDEOS.md](VIDEOS.md)** (comprehensive guide with all options)
 
-### 🔧 **I'm deploying to production**
-→ Follow: **[DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)**
 
 ### 📋 **I want technical reference**
 → See: **[VIDEO_IMPLEMENTATION.md](VIDEO_IMPLEMENTATION.md)**
@@ -27,7 +25,6 @@ QUICKSTART_VIDEOS.md            ← START HERE (5-minute setup)
 VIDEOS.md                       ← Comprehensive guide (400+ lines)
 VIDEO_IMPLEMENTATION.md         ← Technical summary
 README_VIDEOS.md                ← Complete overview
-DEPLOYMENT_CHECKLIST.md         ← Deployment steps
 ```
 
 ### Code Files
@@ -42,8 +39,6 @@ src/Controller/
 wormchat.install                ← Database schema (video media type)
 wormchat.routing.yml            ← API routes
 ```
-
----
 
 ## 🎯 Choose Your Path
 
@@ -91,7 +86,7 @@ drush cache:rebuild
 
 # Test API
 curl http://localhost/api/worm/videos
-curl http://localhost/api/worm/video/healthy
+curl http://localhost/api/worm/video/happy
 
 # Create video via Drush
 drush ev "
@@ -137,12 +132,12 @@ drush watchdog:show
 ```
 User Browser                          Drupal Server
     ↓                                        ↓
-    └─→ fetch('/api/worm/video/healthy')    │
+    └─→ fetch('/api/worm/video/happy')    │
             ↓                                │
             └─→ WormVideoController.php ←───┘
                     ↓
                     Query: Media (worm_state_video)
-                    where state = 'healthy'
+                    where state = 'happy'
                     ↓
                     Return: { url, title, description, ... }
                     ↓
@@ -228,11 +223,7 @@ GET /api/worm/video/{state}/exists    → Check if exists
    ├─ File listing
    ├─ API endpoints
    └─ Usage examples
-   ↓
-5. DEPLOYMENT_CHECKLIST.md       (For production)
-   ├─ Pre-deployment
-   ├─ Step-by-step
-   └─ Rollback procedure
+
 ```
 
 ---
@@ -240,16 +231,18 @@ GET /api/worm/video/{state}/exists    → Check if exists
 ## 🎬 Video States Reference
 
 ```
-healthy         Normal behavior, good movement
-sick            Poor health, sluggish
-dormant         Hibernating, inactive
+happy           Everything is fine
+cold            Temperature is too low
+hot             Temperature is too high
 hungry          Needs food
-overfed         Too much food
-escape_attempt  Trying to escape
-active          High activity
-inactive        Very low activity
+dry             Soil needs more moisture
+wet             Soil contains too much water
+cnHigh          Last foods containesd too much carbon
+cnLow           Last foods contained too much nitrogen
 
-Custom states:  Add any custom state you need!
+Combinations of states are also possible: wet_hot, cold_dry, ... happy can not be combined, nor can clod+hot, wet+dry or cnHigh+cnLow
+
+Custom states:  Add any custom state you need! But be aware, the states mut be added to Thingsboard, too. Thingsboard does the logic of what states the worms are in. 
 ```
 
 ---

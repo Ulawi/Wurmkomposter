@@ -53,13 +53,14 @@ The WormChat module supports playing different videos based on worm health/behav
 
 **Worm State:** *(Required field)*
 - Enter the worm state name
-- Examples: 'dry', 'wet', 'hot', 'cold', 'hungry', 'cnLow', 'cnHigh', 'happy', 'satt'
+- Examples: 'dry', 'wet', 'hot', 'cold', 'hungry', 'cnLow', 'cnHigh', 'happy', 
 - **Use lowercase with underscores (no spaces)**
 - This value is used to match with worm state in the application
+- Examples: 'dry_cnHigh'
 
 **State Description:** *(Optional)*
 - Describe what the video shows
-- Example: "Worm shows healthy behavior with normal movement and feeding"
+- Example: "Worm shows happy behavior and has just been fed"
 
 ### Step 4: Save
 
@@ -113,7 +114,7 @@ cd /home/cazz2/wurmsites/wurm-drupal10-site
 drush media:create worm_state_video \
   --title="Healthy Worm" \
   --field_worm_state_video_file="public://worm/videos/healthy_worm.mp4" \
-  --field_worm_state="healthy" \
+  --field_worm_state="happy" \
   --field_worm_state_description="Worm showing healthy behavior"
 ```
 
@@ -160,7 +161,7 @@ drush ev "
   'field_worm_state_video_file' => [
     'target_id' => \$file->id(),
   ],
-  'field_worm_state' => 'healthy',
+  'field_worm_state' => 'happy',
   'field_worm_state_description' => 'Worm showing healthy behavior with normal movement',
 ]);
 \$media->save();
@@ -168,54 +169,6 @@ drush ev "
 echo "Video created: " . \$media->id();
 ?>
 ```
-
-### Call from Custom Module
-
-Add to your module's `.install` file or a hook:
-
-```php
-function your_module_install() {
-  _your_module_create_worm_videos();
-}
-
-function _your_module_create_worm_videos() {
-  \$videos = [
-    'healthy' => [
-      'file' => 'public://worm/videos/healthy_worm.mp4',
-      'title' => 'Healthy Worm',
-      'description' => 'Normal movement and feeding behavior',
-    ],
-    'sick' => [
-      'file' => 'public://worm/videos/sick_worm.mp4',
-      'title' => 'Sick Worm',
-      'description' => 'Sluggish movement, minimal activity',
-    ],
-  ];
-
-  foreach (\$videos as \$state => \$info) {
-    // Create file entity
-    \$file = \Drupal\file\Entity\File::create([
-      'filename' => basename(\$info['file']),
-      'uri' => \$info['file'],
-      'status' => 1,
-    ]);
-    \$file->save();
-
-    // Create media entity
-    \$media = \Drupal\media\Entity\Media::create([
-      'bundle' => 'worm_state_video',
-      'name' => \$info['title'],
-      'field_worm_state_video_file' => ['target_id' => \$file->id()],
-      'field_worm_state' => \$state,
-      'field_worm_state_description' => \$info['description'],
-    ]);
-    \$media->save();
-    
-    \Drupal::logger('wormchat')->info('Created video for state: @state', ['@state' => \$state]);
-  }
-}
-```
-
 ---
 
 ## Using Videos in JavaScript
@@ -354,15 +307,19 @@ ffmpeg -i input.mov \
 
 ### Naming Convention
 
-Use consistent naming for states:
-- `healthy` - Normal behavior
-- `sick` - Poor health conditions
-- `dormant` - Hibernating/inactive
-- `hungry` - Needs feeding
-- `overfed` - Too much food
-- `escape_attempt` - Trying to escape
-- `active` - Moving around
-- `inactive` - Minimal movement
+| State | Use Case |
+|-------|----------|
+| `dry` | substrate is too dry |
+| `wet` | substrate is too wet |
+| `hot` | temperature too high |
+| `hungry` | Needs food |
+| `cold` | temperature too low |
+| `cnLow` | ratio of carbon/nitrogen is too low |
+| `cnHigh` | ratio of c/n is too high |
+| `satt` | has enough food |
+| `happy` | every value is within the designated range: temperature, moisture, cn, food amount |
+
+**Custom states:** You can add any custom state name! You will need to update thingsboard to send the state in order for the video to be played.
 
 ---
 
