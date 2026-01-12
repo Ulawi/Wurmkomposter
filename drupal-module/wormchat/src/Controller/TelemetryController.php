@@ -29,8 +29,8 @@ class TelemetryController extends ControllerBase {
         return new JsonResponse(['error' => 'Invalid data'], 400);
       }
 
-      // Retrieve device token from user
-      $device_token = $this->getUserDeviceToken($user->id());
+      // Retrieve device token from secure key-value store
+      $device_token = \wormchat_get_device_token($user->id());
       
       if (!$device_token) {
         \Drupal::logger('wormchat')->warning('No device token for user @uid', ['@uid' => $user->id()]);
@@ -61,7 +61,7 @@ class TelemetryController extends ControllerBase {
       return new JsonResponse(['error' => 'Unauthorized'], 401);
     }
 
-    $device_token = $this->getUserDeviceToken($user->id());
+    $device_token = \wormchat_get_device_token($user->id());
     
     if (!$device_token) {
       return new JsonResponse(['error' => 'No device token configured'], 403);
@@ -84,8 +84,8 @@ class TelemetryController extends ControllerBase {
         return new JsonResponse(['error' => 'Unauthorized'], 401);
       }
 
-      // Retrieve device token from user
-      $device_token = $this->getUserDeviceToken($user->id());
+      // Retrieve device token from secure key-value store
+      $device_token = \wormchat_get_device_token($user->id());
       
       if (!$device_token) {
         \Drupal::logger('wormchat')->warning('No device token for user @uid', ['@uid' => $user->id()]);
@@ -107,35 +107,6 @@ class TelemetryController extends ControllerBase {
       return new JsonResponse(['error' => 'Server error: ' . $e->getMessage()], 500);
     }
   }
-
-  private function getUserDeviceToken($uid) {
-    try {
-      // Load user entity
-      $user = User::load($uid);
-      
-      if (!$user) {
-        \Drupal::logger('wormchat')->error('User @uid not found', ['@uid' => $uid]);
-        return NULL;
-      }
-
-      // Get token from user field
-      if ($user->hasField('field_device_access_token')) {
-        $token = $user->get('field_device_access_token')->value;
-        
-        if ($token) {
-          \Drupal::logger('wormchat')->info('Device token retrieved for user @uid', ['@uid' => $uid]);
-          return $token;
-        }
-      }
-
-      \Drupal::logger('wormchat')->warning('No device token field or value for user @uid', ['@uid' => $uid]);
-      return NULL;
-    } catch (\Exception $e) {
-      \Drupal::logger('wormchat')->error('Error retrieving device token: @error', ['@error' => $e->getMessage()]);
-      return NULL;
-    }
-  }
-
   private function sendToThingsBoard($device_token, $data) {
     // Use external ThingsBoard Cloud instance
     $thingsboard_url = 'https://thingsboard.cloud/api/v1/' . $device_token . '/telemetry';
@@ -143,14 +114,8 @@ class TelemetryController extends ControllerBase {
     try {
       $json_data = json_encode($data);
       
-      // Log the EXACT curl command equivalent
-      $curl_command = 'curl -X POST "' . $thingsboard_url . '" ' .
-        '--header "Content-Type: application/json" ' .
-        '--data \'' . $json_data . '\'';
-      
-      \Drupal::logger('wormchat')->info('Equivalent curl command: @curl', ['@curl' => $curl_command]);
-      \Drupal::logger('wormchat')->info('Device token: @token', ['@token' => $device_token]);
-      \Drupal::logger('wormchat')->info('Payload data: @data', ['@data' => $json_data]);
+      // Log the payload data only (not the token for security)
+      \Drupal::logger('wormchat')->info('Sending telemetry payload: @data', ['@data' => $json_data]);
 
       $response = \Drupal::httpClient()->post($thingsboard_url, [
         'headers' => [

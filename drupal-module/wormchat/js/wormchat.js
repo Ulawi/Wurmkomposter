@@ -4,7 +4,7 @@
   window.WormChat = window.WormChat || {};
 
   // Available worm states (matches ThingsBoard worm_condition values)
-  const STATES = ["dry", "wet", "hot", "cold", "hungry", "cnLow", "cnHigh", "happy"];
+  const STATES = ["dry", "wet", "hot", "cold", "hungry", "cnLow", "cnHigh", "happy", "hello"];
 
   /**
    * Fetches the current user's device key from the Drupal backend.
@@ -290,6 +290,60 @@
   }
 
   /**
+   * Fetches the first-time chat flag from the user.
+   * Returns true if this is the user's first time chatting, false otherwise.
+   */
+  window.WormChat.checkFirstTimeChat = async function () {
+    try {
+      const response = await fetch('/api/worm/first-chat-check', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        console.warn('Failed to check first-time chat status:', response.status);
+        return false;
+      }
+
+      const data = await response.json();
+      console.log('First chat check:', data);
+      return data.is_first_chat || false;
+    } catch (err) {
+      console.error('Error checking first-time chat:', err);
+      return false;
+    }
+  };
+
+  /**
+   * Sets the first-time chat flag to true (marks that user has seen the greeting).
+   */
+  window.WormChat.markFirstChatSeen = async function () {
+    try {
+      const response = await fetch('/api/worm/first-chat-mark-seen', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        console.warn('Failed to mark first chat as seen:', response.status);
+        return false;
+      }
+
+      console.log('✓ Marked first chat as seen');
+      return true;
+    } catch (err) {
+      console.error('Error marking first chat:', err);
+      return false;
+    }
+  };
+
+  /**
    * Drupal behavior for the Worm Chat block.
    */
   Drupal.behaviors.wormChat = {
@@ -331,13 +385,111 @@
           console.warn("#feedBtnImg not found in wrapper");
         }
 
-        // initial load - load state and thought image WITHOUT playing video or disabling button
+        // initial load - check if first time, then load state and thought image
         (async () => {
+          const isFirstChat = await window.WormChat.checkFirstTimeChat();
           const stateKey = await window.WormChat.getWormState();
-          await window.WormChat.updateWormState(stateKey, wrapper, helloImg, true);
+          
+          if (isFirstChat) {
+            console.log("✓ First time chat detected - playing hello video");
+            // Play hello video instead of regular state video
+            await window.WormChat.updateWormStateWithFolder(stateKey, 'hello', wrapper, helloImg, true);
+            // Mark that we've shown the greeting
+            await window.WormChat.markFirstChatSeen();
+          } else {
+            // Regular state video on subsequent visits
+            await window.WormChat.updateWormState(stateKey, wrapper, helloImg, true);
+          }
         })();
       });
     }
+  };
+
+  /**
+   * Updates the worm's video from a specific folder (like 'hello' for first-time greeting).
+   * Similar to updateWormState but allows specifying a different folder.
+   */
+  window.WormChat.updateWormStateWithFolder = async function (stateKey, folder, wrapper, helloImg, isInitialLoad = false) {
+    if (!wrapper) {
+      console.warn("updateWormStateWithFolder called without wrapper element");
+      return;
+    }
+
+    console.log(`updateWormStateWithFolder called with stateKey: '${stateKey}', folder: '${folder}', isInitialLoad: ${isInitialLoad}`);
+
+    const videoEl = wrapper.querySelector("#worm-video");
+    const thoughtImg = wrapper.querySelector("#thought-image");
+
+    if (!helloImg) {
+      helloImg = wrapper.querySelector("#helloBtnImage");
+    }
+
+    if (!videoEl || !thoughtImg || !helloImg) {
+      console.warn("updateWormStateWithFolder: required DOM elements not found", {
+        videoEl: !!videoEl,
+        thoughtImg: !!thoughtImg,
+        helloImg: !!helloImg
+      });
+      return;
+    }
+
+    // Try to fetch a random video from the specified folder
+    let videoUrl = null;
+    
+    try {
+      console.log(`Fetching random video from folder: '${folder}'`);
+      const response = await fetch(`/api/worm/video/${encodeURIComponent(folder)}/random`);
+      
+      if (response.ok) {
+        const videoData = await response.json();
+        videoUrl = videoData.video;
+        console.log(`✓ Found random video from '${folder}': ${videoData.filename || folder}`);
+      } else {
+        console.warn(`No videos found in folder '${folder}' (${response.status}), will use fallback`);
+      }
+    } catch (err) {
+      console.warn(`Failed to fetch random video from folder '${folder}':`, err);
+    }
+
+    // Fallback: use standard mapping
+    if (!videoUrl) {
+      const fallback = fallbackMappingForState(stateKey);
+      videoUrl = fallback.video;
+      console.log(`Using fallback video for state: ${stateKey}`);
+    }
+    
+    // Resolve thought image
+    const thoughtUrl = await resolveThoughtImagePath(`/sites/default/files/pictures/${stateKey}`);
+
+    console.log("updateWormStateWithFolder resolved:", { stateKey, folder, videoUrl, thoughtUrl, isInitialLoad });
+
+    // Update video source
+    const sourceEl = videoEl.querySelector("source");
+    if (sourceEl) {
+      sourceEl.src = videoUrl;
+    } else {
+      videoEl.src = videoUrl;
+    }
+    videoEl.load();
+    videoEl.muted = false;
+
+    // Only disable button and play video if NOT initial load
+    if (!isInitialLoad) {
+      console.log("✓ Playing video from folder:", videoUrl);
+      helloImg.classList.add("disabled");
+      videoEl.play().catch(err => console.log("Video play prevented or failed:", err));
+    } else {
+      console.log("Initial load - video ready but not playing");
+    }
+
+    // Restore button after finished
+    videoEl.onended = () => {
+      console.log("Video ended, restoring button");
+      helloImg.classList.remove("disabled");
+    };
+
+    // Update thought image
+    thoughtImg.src = thoughtUrl;
   };
 
 

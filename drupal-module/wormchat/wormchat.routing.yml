@@ -1,38 +1,5 @@
-# REST resource for fetching user device key
-rest.user_device_key.GET:
-  path: '/api/v1/user/device-key'
-  defaults:
-    _controller: '\Drupal\rest\Plugin\rest\resource\UserDeviceKeyResource'
-    _format: 'json'
-  requirements:
-    _permission: 'access content'
-    _format: 'json'
-  methods: [GET]
-
-wormchat.add_food:
-  path: '/admin/wormchat/add-food'
-  defaults:
-    _form: '\Drupal\wormchat\Form\AddFoodItemForm'
-    _title: 'Add Food Item'
-  requirements:
-    _permission: 'administer site configuration'
-
-wormchat.food_list:
-  path: '/admin/wormchat/foods'
-  defaults:
-    _controller: '\Drupal\wormchat\Controller\FoodListController::list'
-    _title: 'Food Items'
-  requirements:
-    _permission: 'administer site configuration'
-
-wormchat.telemetry:
-  path: '/api/wormchat/telemetry'
-  defaults:
-    _controller: '\Drupal\wormchat\Controller\TelemetryController::sendTelemetry'
-  requirements:
-    _access: 'TRUE'
-  methods: [POST]
-
+# GET endpoint for retrieving user device key
+# Uses TelemetryController which was the original implementation
 wormchat.device_key:
   path: '/api/v1/user/device-key'
   defaults:
@@ -94,3 +61,62 @@ wormchat.video.random:
   requirements:
     _permission: 'access content'
   methods: [GET]
+
+# Device setup page - for new users to flash firmware
+wormchat.setup:
+  path: '/setup'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\WormSetupController::setupPage'
+    _title: 'Device Setup'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+
+# API endpoint for device provisioning - receives token from ESP32
+wormchat.device.provision:
+  path: '/api/wormchat/device-provision'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\WormSetupController::provisionDevice'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+  methods: [POST]
+
+# REST endpoint for device token storage (receives email + token from device)
+wormchat.device_token:
+  path: '/api/v1/user/device-token'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\DeviceTokenController::storeToken'
+    _format: 'json'
+  requirements:
+    _access: 'TRUE'
+    _format: 'json'
+  methods: [POST]
+
+# Telemetry endpoint for sending feeding data to ThingsBoard
+wormchat.telemetry:
+  path: '/api/wormchat/telemetry'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\TelemetryController::sendTelemetry'
+    _format: 'json'
+  requirements:
+    _access: 'TRUE'
+    _format: 'json'
+  methods: [POST]
+
+# ===== FIRST-TIME CHAT ROUTES =====
+# Check if this is the user's first time chatting
+wormchat.first_chat_check:
+  path: '/api/worm/first-chat-check'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\WormChatApiController::checkFirstChat'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+  methods: [GET]
+
+# Mark the first chat as seen
+wormchat.first_chat_mark_seen:
+  path: '/api/worm/first-chat-mark-seen'
+  defaults:
+    _controller: '\Drupal\wormchat\Controller\WormChatApiController::markFirstChatSeen'
+  requirements:
+    _user_is_logged_in: 'TRUE'
+  methods: [POST]

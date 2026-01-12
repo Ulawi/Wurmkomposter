@@ -36,7 +36,11 @@
   min-height: 0;
   border-radius: var(--wormchat-border-radius);
   overflow: hidden;
-  background-color: #000; /* fallback background for empty video */
+  background-color: #000; /* fallback background */
+  background-image: url('../images/wurm_closeup_w_face9_16.jpg');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;

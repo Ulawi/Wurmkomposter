@@ -22,3 +22,19 @@ wormFeeding:
     - core/drupal
     - core/jquery
     - core/once
+
+setup:
+  version: 1.0
+  css:
+    theme:
+      css/setup.css: {}
+  dependencies:
+    - core/drupal
+
+wormSetup:
+  version: 1.0
+  js:
+    js/wormSetup.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings

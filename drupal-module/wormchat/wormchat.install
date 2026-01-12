@@ -16,6 +16,9 @@ function wormchat_install() {
   _wormchat_create_fields();
   _wormchat_create_video_fields();
   
+  // Create user fields for device provisioning
+  _wormchat_create_user_fields();
+  
   // Create the directory for food images
   _wormchat_create_directories();
   
@@ -189,14 +192,16 @@ function _wormchat_create_video_field_storage() {
   }
 
   // Field: field_worm_state (list field to store one or more states)
-  if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_worm_state')) {
-    \Drupal\field\Entity\FieldStorageConfig::create([
+  $field_worm_state = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_worm_state');
+  if (!$field_worm_state) {
+    $field_worm_state = \Drupal\field\Entity\FieldStorageConfig::create([
       'field_name' => 'field_worm_state',
       'entity_type' => 'media',
       'type' => 'list_string',
       'cardinality' => -1,  // Unlimited - allows multiple states
       'settings' => [
         'allowed_values' => [
+          'hello' => t('Willkommensgruß'),
           'cold' => t('kalt'),
           'hot' => t('heiß'),
           'dry' => t('trocken'),
@@ -207,9 +212,28 @@ function _wormchat_create_video_field_storage() {
           'cnlow' => t('CN niedrig'),
         ],
       ],
-    ])->save();
+    ]);
     \Drupal::logger('wormchat')->info('Created field storage: field_worm_state');
+  } else {
+    // Update existing field storage to use list_string type with allowed_values
+    $field_worm_state->set('type', 'list_string');
+    $field_worm_state->set('cardinality', -1);
+    $field_worm_state->set('settings', [
+      'allowed_values' => [
+        'hello' => t('Willkommensgruß'),
+        'cold' => t('kalt'),
+        'hot' => t('heiß'),
+        'dry' => t('trocken'),
+        'wet' => t('nass'),
+        'hungry' => t('hungrig'),
+        'happy' => t('happy'),
+        'cnhigh' => t('CN hoch'),
+        'cnlow' => t('CN niedrig'),
+      ],
+    ]);
+    \Drupal::logger('wormchat')->info('Updated field storage: field_worm_state');
   }
+  $field_worm_state->save();
 
   // Field: field_worm_state_description (optional description)
   if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_worm_state_description')) {
@@ -440,7 +464,7 @@ function _wormchat_create_video_fields() {
   }
   
   // Always update the description (even if field already exists)
-  $field_worm_state->setDescription('Gib an, beim welchem Zustand dieses Video abgespielt werden soll. Mögliche Werte sind: dry, wet, hot, cold, hungry, cnLow, cnHigh, happy. Wenn das Video für einen kombinierten Zustand ist, verbinde die Zustände mit _ : cold_dry');
+  $field_worm_state->setDescription('Gib an, beim welchem Zustand dieses Video abgespielt werden soll. Mögliche Werte sind: hello (Willkommensgruß beim ersten Besuch), dry, wet, hot, cold, hungry, cnLow, cnHigh, happy. Wenn das Video für einen kombinierten Zustand ist, verbinde die Zustände mit _ : cold_dry');
   $field_worm_state->save();
   \Drupal::logger('wormchat')->info('Created/updated field config: field_worm_state');
 
@@ -523,7 +547,7 @@ function _wormchat_create_video_fields() {
 }
 
 /**
- * Create directories for food images and worm videos.
+ * Create directories for food images.
  */
 function _wormchat_create_directories() {
   $dir = 'public://worm_food';
@@ -554,12 +578,13 @@ function _wormchat_create_video_directories() {
     \Drupal::logger('wormchat')->info('Created directory: @dir', ['@dir' => $videos_dir]);
   }
 
+
   // Single state directories
-  $single_states = ['cold', 'hot', 'dry', 'wet', 'hungry', 'happy', 'cnhigh', 'cnlow'];
+  $single_states = ['cold', 'hot', 'dry', 'wet', 'hungry', 'happy', 'cnhigh', 'cnlow', 'hello'];
   
   // State combination directories (2 states)
   // Excluding mutually exclusive pairs: cold+hot, dry+wet, cnhigh+cnlow
-  // Excluding happy (cannot be combined)
+  // Excluding happy and hello (cannot be combined)
   $combinations = [
     'cold_dry',
     'cold_wet',
@@ -737,5 +762,51 @@ function wormchat_uninstall() {
     $entities = $storage->loadMultiple($video_ids);
     $storage->delete($entities);
     \Drupal::logger('wormchat')->info('Deleted @count worm_state_video media entities', ['@count' => count($video_ids)]);
+  }
+
+  // Delete field storage for field_worm_state to allow type change on reinstall
+  $field_worm_state = \Drupal\field\Entity\FieldStorageConfig::loadByName('media', 'field_worm_state');
+  if ($field_worm_state) {
+    $field_worm_state->delete();
+    \Drupal::logger('wormchat')->info('Deleted field storage: field_worm_state during uninstall');
+  }
+}
+
+/**
+ * Device tokens are stored using Drupal's key-value store for better security.
+ * This function is no longer needed - tokens are not stored in user fields.
+ * 
+ * Keeping this as a placeholder for backward compatibility during uninstall.
+ */
+function _wormchat_create_user_fields() {
+  // Device tokens are now stored in Drupal's key-value store (keyvalue service)
+  // This provides better security than user fields:
+  // - Tokens are isolated from user entity lifecycle
+  // - Won't be exposed via REST APIs
+  // - Can't be accidentally loaded with user data
+
+  // Create field storage for first-time chat flag
+  if (!\Drupal\field\Entity\FieldStorageConfig::loadByName('user', 'field_first_chat_seen')) {
+    \Drupal\field\Entity\FieldStorageConfig::create([
+      'field_name' => 'field_first_chat_seen',
+      'entity_type' => 'user',
+      'type' => 'boolean',
+      'cardinality' => 1,
+    ])->save();
+    \Drupal::logger('wormchat')->info('Created field storage: field_first_chat_seen');
+  }
+
+  // Create field instance on user entity
+  if (!\Drupal\field\Entity\FieldConfig::loadByName('user', 'user', 'field_first_chat_seen')) {
+    \Drupal\field\Entity\FieldConfig::create([
+      'field_name' => 'field_first_chat_seen',
+      'entity_type' => 'user',
+      'bundle' => 'user',
+      'label' => 'First Chat Seen',
+      'description' => 'Whether the user has seen the first-time hello greeting',
+      'required' => FALSE,
+      'default_value' => [['value' => 0]],
+    ])->save();
+    \Drupal::logger('wormchat')->info('Created field instance: field_first_chat_seen on user');
   }
 }

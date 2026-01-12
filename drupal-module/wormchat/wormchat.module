@@ -26,6 +26,13 @@ function wormchat_theme($existing, $type, $theme, $path) {
       ],
       'template' => 'worm-feeding-block',
     ],
+    'worm_setup_page' => [
+      'variables' => [
+        'has_token' => FALSE,
+        'base_path' => '',
+      ],
+      'template' => 'worm-setup-page',
+    ],
     'wormchat_food_list' => [
       'variables' => [
         'items' => [],
@@ -39,42 +46,11 @@ function wormchat_theme($existing, $type, $theme, $path) {
 /**
  * Implements hook_page_attachments().
  * Do NOT expose device key directly - only pass ThingsBoard URL
- * Also inject theme CSS variables for wormchat styling.
  */
 function wormchat_page_attachments(array &$attachments) {
-  // 1. Attach ThingsBoard URL as drupalSettings
+  // Attach ThingsBoard URL as drupalSettings
   $attachments['#attached']['drupalSettings']['wormchat'] = [
     'thingsBoardUrl' => \Drupal::config('wormchat.settings')->get('thingsboard_url') ?? 'https://thingsboard.cloud',
-  ];
-
-  // 2. Get theme colors from theme settings or use defaults
-  $theme = \Drupal::config('system.theme')->get('default');
-  $theme_config = \Drupal::config($theme . '.settings');
-  
-  $primary_color = $theme_config->get('primary_color') ?? '#007bff';
-  $secondary_color = $theme_config->get('secondary_color') ?? '#6c757d';
-  $body_bg = $theme_config->get('body_bg') ?? '#ffffff';
-  $body_color = $theme_config->get('body_color') ?? '#212529';
-  $border_color = $theme_config->get('border_color') ?? '#dee2e6';
-  $warning_color = $theme_config->get('warning_color') ?? '#fff3cd';
-  
-  // 3. Inject CSS variables into html_head
-  $css_variables = ":root {
-    --wormchat-primary: {$primary_color};
-    --wormchat-secondary: {$secondary_color};
-    --wormchat-body-bg: {$body_bg};
-    --wormchat-body-color: {$body_color};
-    --wormchat-border-color: {$border_color};
-    --wormchat-warning: {$warning_color};
-  }";
-
-  $attachments['#attached']['html_head'][] = [
-    [
-      '#tag' => 'style',
-      '#value' => $css_variables,
-      '#attributes' => ['type' => 'text/css'],
-    ],
-    'wormchat-css-variables',
   ];
 }
 
@@ -508,5 +484,81 @@ function wormchat_entity_delete(EntityInterface $entity) {
     } else {
       \Drupal::logger('wormchat')->error('Failed to delete video file: @file', ['@file' => $file_path]);
     }
+  }
+}
+
+/**
+ * Retrieve device token from secure key-value store.
+ * 
+ * @param int $uid
+ *   User ID to retrieve token for.
+ * 
+ * @return string|NULL
+ *   The device token, or NULL if not found.
+ */
+function wormchat_get_device_token($uid) {
+  try {
+    $token = \Drupal::service('keyvalue')
+      ->get('wormchat_device_tokens')
+      ->get($uid);
+    
+    if ($token) {
+      \Drupal::logger('wormchat')->info('Device token retrieved for user @uid', ['@uid' => $uid]);
+      return $token;
+    }
+    
+    \Drupal::logger('wormchat')->debug('No device token found for user @uid', ['@uid' => $uid]);
+    return NULL;
+  } catch (\Exception $e) {
+    \Drupal::logger('wormchat')->error('Error retrieving device token: @error', ['@error' => $e->getMessage()]);
+    return NULL;
+  }
+}
+
+/**
+ * Store device token in secure key-value store.
+ * 
+ * @param int $uid
+ *   User ID to store token for.
+ * @param string $token
+ *   The device token to store.
+ * 
+ * @return bool
+ *   TRUE if successfully stored, FALSE otherwise.
+ */
+function wormchat_set_device_token($uid, $token) {
+  try {
+    \Drupal::service('keyvalue')
+      ->get('wormchat_device_tokens')
+      ->set($uid, $token);
+    
+    \Drupal::logger('wormchat')->info('Device token stored for user @uid', ['@uid' => $uid]);
+    return TRUE;
+  } catch (\Exception $e) {
+    \Drupal::logger('wormchat')->error('Error storing device token: @error', ['@error' => $e->getMessage()]);
+    return FALSE;
+  }
+}
+
+/**
+ * Delete device token from secure key-value store.
+ * 
+ * @param int $uid
+ *   User ID to delete token for.
+ * 
+ * @return bool
+ *   TRUE if successfully deleted, FALSE otherwise.
+ */
+function wormchat_delete_device_token($uid) {
+  try {
+    \Drupal::service('keyvalue')
+      ->get('wormchat_device_tokens')
+      ->delete($uid);
+    
+    \Drupal::logger('wormchat')->info('Device token deleted for user @uid', ['@uid' => $uid]);
+    return TRUE;
+  } catch (\Exception $e) {
+    \Drupal::logger('wormchat')->error('Error deleting device token: @error', ['@error' => $e->getMessage()]);
+    return FALSE;
   }
 }
