@@ -12,7 +12,6 @@
       { name: 'blue', label: 'Blue' },
       { name: 'violet', label: 'Violet' },
       { name: 'brown', label: 'Brown' },
-      { name: 'black', label: 'Black' },
       { name: 'white', label: 'White' }
     ] %}
 
@@ -57,6 +56,31 @@
         <div id="boardItems" class="board-items"></div>
       </div>
     </div>
+  </div>
+
+  <!-- Quick Feed Section -->
+  <div class="quick-feed-section mt-4" style="width: 100%; max-width: 600px; margin-left: auto; margin-right: auto;">
+    <div class="input-group">
+      <span class="input-group-text">
+        <i class="fas fa-search"></i>
+      </span>
+      <input 
+        type="text" 
+        id="quick-feed-input" 
+        class="form-control" 
+        placeholder="{{ 'Suchen...'|t }}"
+        autocomplete="off"
+        data-drupal-autocomplete>
+      <button 
+        id="quick-feed-btn" 
+        class="btn btn-primary" 
+        type="button"
+        aria-label="{{ 'Suchen'|t }}"
+        title="{{ 'Suchen'|t }}">
+        🔍
+      </button>
+    </div>
+    <div id="quick-feed-suggestions" class="quick-feed-suggestions"></div>
   </div>
 
   <!-- CONTROLS ROW: Knife • Cups • Feeding Done (Responsive) -->

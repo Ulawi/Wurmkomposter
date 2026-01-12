@@ -1,0 +1,18 @@
+{
+  "name": "Wurm Monitoring Firmware",
+  "version": "1.0.0",
+  "description": "IoT sensor firmware for monitoring worm composting conditions",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32",
+
+      "parts": [
+        {
+          "path": "firmware-merged.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}

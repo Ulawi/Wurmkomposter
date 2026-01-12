@@ -106,10 +106,6 @@
   background-color: var(--food-color-brown, #47240bff);
 }
 
-.color-category-btn[data-color="black"] .color-swatch {
-  background-color: var(--food-color-black, #000000ff);
-}
-
 .color-category-btn[data-color="white"] .color-swatch {
   background-color: var(--food-color-white, #f2f5f7ff);
 }
@@ -305,6 +301,96 @@
   touch-action: none;
   -webkit-user-drag: none;
 }
+
+/* Quick Feed Section */
+.quick-feed-section {
+  background: white;
+  padding: 0.5rem;
+  border-radius: 8px;
+  position: relative;
+}
+
+.quick-feed-section .input-group {
+  position: relative;
+}
+
+.quick-feed-section .form-control {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 0;
+  transition: border-color 0.3s ease;
+}
+
+.quick-feed-section .form-control:focus {
+  border-color: #1a5c3a;
+  box-shadow: none;
+  outline: none;
+}
+
+.quick-feed-section .input-group-text {
+  background: transparent;
+  border: 2px solid #e0e0e0;
+  color: #1a5c3a;
+  padding: 0.75rem 1rem;
+}
+
+.quick-feed-section .btn {
+  background-color: #1a5c3a;
+  border: 2px solid #1a5c3a;
+  border-radius: 0;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.quick-feed-section .btn:hover {
+  background-color: #0d3d24;
+  border-color: #0d3d24;
+}
+
+/* Autocomplete Suggestions */
+.quick-feed-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  width: 100%;  /* ← Match the width of input-group */
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-top: none;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  display: none;
+}
+
+.quick-feed-suggestions.show {
+  display: block;
+}
+
+.quick-feed-suggestion-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.quick-feed-suggestion-item:hover,
+.quick-feed-suggestion-item.active {
+  background-color:var(--wormchat-secondary, #81c784) !important;
+  color: white !important;
+  font-weight: 600;
+}
+
+.quick-feed-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.quick-feed-suggestion-item strong {
+  color: #1a5c3a;
+}
+
 
 /* CHOP ACTION - NOW IN SAME ROW AS CHOPPING BOARD (RESPONSIVE) */
 .chop-action {

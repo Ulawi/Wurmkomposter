@@ -74,6 +74,7 @@
     setupCupDrag();
     setupFeedingDone();
     setupColorFiltering();
+    setupCupClickHandlers(); // ===== NEW: Initialize cup click handlers =====
 
     // ===== COLOR FILTERING: Setup color category buttons =====
     function setupColorFiltering() {
@@ -731,34 +732,41 @@
           console.warn('✗ Telemetry not sent - missing data. fedMaterials: ' + fedMaterials.length + ', cups: ' + selectedCup.size);  // ===== NEW: Debug missing data =====
         }
 
-        // ===== RESET BOARD =====
-        board.innerHTML = '';
-        boardItems.clear();
+        // ===== VISUAL FEEDBACK: Show full cups for 1 second =====
+        feedingDone.src = '/modules/custom/wormchat/images/give_cups_full.png';
+        console.log('✓ Feeding successful - showing confirmation');
 
-        // ===== RESET CUPS =====
-        cups.forEach((cup) => {
-          const cupsCount = cup.dataset.cups;
-          cup.src = '/modules/custom/wormchat/images/' + cupsCount + 'cups_empty.png';  // ===== FIX: String concatenation =====
-        });
+        // ===== AFTER 1 SECOND: Reset everything =====
+        setTimeout(() => {
+          // ===== RESET BOARD =====
+          board.innerHTML = '';
+          boardItems.clear();
 
-        // ===== RESET FEEDINGDONE BUTTON =====
-        feedingDone.src = '/modules/custom/wormchat/images/give_cups_empty.png';
+          // ===== RESET CUPS =====
+          cups.forEach((cup) => {
+            const cupsCount = cup.dataset.cups;
+            cup.src = '/modules/custom/wormchat/images/' + cupsCount + 'cups_empty.png';  // ===== FIX: String concatenation =====
+          });
 
-        // ===== RESET GALLERY =====
-        gallery.querySelectorAll('.food-item').forEach((item) => {
-          item.style.display = '';
-        });
+          // ===== RESET FEEDINGDONE BUTTON =====
+          feedingDone.src = '/modules/custom/wormchat/images/give_cups_empty.png';
 
-        // ===== RESET STATE =====
-        fedMaterials = [];
-        selectedCup = { id: null, size: null, element: null };
-        isBoardLocked = false;
-        currentColorFilter = 'green';  // ===== NEW: Reset color filter =====
+          // ===== RESET GALLERY =====
+          gallery.querySelectorAll('.food-item').forEach((item) => {
+            item.style.display = '';
+          });
 
-        console.log('✓ Board reset - ready for next feeding');
-        updateKnifeState();
-        filterFoodsByColor('green');  // ===== Reset to green color filter =====
-        updateGalleryBorderColor('green');  // ===== NEW: Reset border color =====
+          // ===== RESET STATE =====
+          fedMaterials = [];
+          selectedCup = { id: null, size: null, element: null };
+          isBoardLocked = false;
+          currentColorFilter = 'green';  // ===== NEW: Reset color filter =====
+
+          console.log('✓ Board reset - ready for next feeding');
+          updateKnifeState();
+          filterFoodsByColor('green');  // ===== Reset to green color filter =====
+          updateGalleryBorderColor('green');  // ===== NEW: Reset border color =====
+        }, 1000);  // ===== Wait 1 second before resetting =====
       });
     }
 
@@ -790,6 +798,238 @@
           console.error('✗ Telemetry send failed:', error);
         });
     }
+
+    // ===== QUICK FEED: Setup text input autocomplete =====
+    setupQuickFeed();
+
+    // ===== QUICK FEED SETUP =====
+    function setupQuickFeed() {
+      const quickInput = wrapper.querySelector('#quick-feed-input');
+      const quickBtn = wrapper.querySelector('#quick-feed-btn');
+      const suggestions = wrapper.querySelector('#quick-feed-suggestions');
+      let allFoods = [];
+      let selectedSuggestionIndex = -1;
+
+      // ===== LOAD ALL AVAILABLE FOODS FROM GALLERY =====
+      function loadAvailableFoods() {
+        const foodItems = gallery.querySelectorAll('.food-item');
+        allFoods = Array.from(foodItems).map(item => ({
+          key: item.dataset.foodKey,
+          src: item.dataset.foodSrc,
+          name: item.dataset.foodKey.charAt(0).toUpperCase() + item.dataset.foodKey.slice(1)
+        }));
+        console.log('Available foods loaded:', allFoods.map(f => f.name).join(', '));
+      }
+
+      loadAvailableFoods();
+
+      // ===== RELOAD FOODS ON INPUT FOCUS =====
+      quickInput.addEventListener('focus', () => {
+        loadAvailableFoods(); //reloading available foods, in case new foods were added by admin
+      });
+
+      // ===== INPUT EVENT: Show suggestions as user types =====
+      quickInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.trim().toLowerCase();
+        selectedSuggestionIndex = -1;
+
+        if (searchTerm.length === 0) {
+          suggestions.classList.remove('show');
+          return;
+        }
+
+        // ===== FILTER FOODS BY SEARCH TERM =====
+        const filtered = allFoods.filter(food => 
+          food.name.toLowerCase().startsWith(searchTerm) ||
+          food.key.toLowerCase().startsWith(searchTerm)
+        );
+
+        if (filtered.length === 0) {
+          suggestions.classList.remove('show');
+          return;
+        }
+
+        // ===== BUILD SUGGESTIONS HTML =====
+        suggestions.innerHTML = filtered.map((food, index) => `
+          <div class="quick-feed-suggestion-item" data-food-key="${food.key}" data-index="${index}">
+            <strong>${food.name}</strong>
+          </div>
+        `).join('');
+
+        suggestions.classList.add('show');
+
+        // ===== SETUP SUGGESTION CLICK HANDLERS =====
+        suggestions.querySelectorAll('.quick-feed-suggestion-item').forEach(item => {
+          item.addEventListener('click', () => {
+            selectSuggestion(item);
+          });
+        });
+      });
+
+      // ===== KEYBOARD NAVIGATION: Arrow keys + Enter =====
+      quickInput.addEventListener('keydown', (e) => {
+        const items = suggestions.querySelectorAll('.quick-feed-suggestion-item');
+        
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, items.length - 1);
+          updateSuggestionHighlight(items);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedSuggestionIndex = Math.max(selectedSuggestionIndex - 1, -1);
+          updateSuggestionHighlight(items);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (selectedSuggestionIndex >= 0 && items[selectedSuggestionIndex]) {
+            selectSuggestion(items[selectedSuggestionIndex]);
+          } else if (quickInput.value.trim().length > 0) {
+            // ===== Allow free text entry if no match =====
+            addFoodByText(quickInput.value.trim());
+          }
+        } else if (e.key === 'Escape') {
+          suggestions.classList.remove('show');
+        }
+      });
+
+      // ===== UPDATE HIGHLIGHT ON SUGGESTION ITEMS =====
+      function updateSuggestionHighlight(items) {
+        items.forEach((item, index) => {
+          if (index === selectedSuggestionIndex) {
+            item.classList.add('active');
+            item.scrollIntoView({ block: 'nearest' });
+          } else {
+            item.classList.remove('active');
+          }
+        });
+      }
+
+      // ===== SELECT SUGGESTION =====
+      function selectSuggestion(item) {
+        const foodKey = item.dataset.foodKey;
+        const food = allFoods.find(f => f.key === foodKey);
+        
+        if (food) {
+          addFoodByKey(food.key, food.src);
+          quickInput.value = '';
+          suggestions.classList.remove('show');  // ← Already clearing here
+          selectedSuggestionIndex = -1;           // ← Reset index
+          suggestions.innerHTML = '';             // ← Clear the HTML list
+          console.log('✓ Quick feed: ' + food.name + ' added');
+        }
+      }
+
+      // ===== ADD FOOD BY KEYBOARD (free text) =====
+      function addFoodByText(text) {
+        const food = allFoods.find(f => 
+          f.name.toLowerCase() === text.toLowerCase() ||
+          f.key.toLowerCase() === text.toLowerCase()
+        );
+
+        if (food) {
+          addFoodByKey(food.key, food.src);
+          quickInput.value = '';
+          suggestions.classList.remove('show');  // ← Clear suggestions
+          selectedSuggestionIndex = -1;           // ← Reset index
+          suggestions.innerHTML = '';             // ← Clear the HTML list
+          console.log('✓ Quick feed by text: ' + food.name);
+        } else {
+          console.warn('✗ Food not found: ' + text);
+          quickInput.value = '';
+          suggestions.classList.remove('show');  // ← Also clear on invalid input
+          suggestions.innerHTML = '';
+        }
+      }
+
+      // ===== ADD FOOD BY KEY (reuse existing function) =====
+      function addFoodByKey(foodKey, foodSrc) {
+        if (isBoardLocked || boardItems.size >= MAX_BOARD_ITEMS) {
+          console.warn('Cannot add: board locked or full');
+          return;
+        }
+
+        if (boardItems.has(foodKey)) {
+          console.warn('Food already on board: ' + foodKey);
+          return;
+        }
+
+        addFoodItemToBoard(foodKey, foodSrc);
+      }
+
+      // ===== QUICK FEED BUTTON: Add via button click =====
+      quickBtn.addEventListener('click', () => {
+        const input = quickInput.value.trim();
+        if (input.length > 0) {
+          addFoodByText(input);
+        }
+      });
+
+      // ===== CLOSE SUGGESTIONS WHEN CLICKING OUTSIDE =====
+      document.addEventListener('click', (e) => {
+        if (!wrapper.contains(e.target)) {
+          suggestions.classList.remove('show');
+        }
+      });
+    }
+
+    // ===== SETUP: Cup Click Handler (direct feeding without chopping) =====
+    function setupCupClickHandlers() {
+      cups.forEach((cup) => {
+        cup.addEventListener('click', (e) => {
+          // Check if there are items on the board
+          if (boardItems.size === 0) {
+            console.log('No food on board - cannot feed');
+            return;
+          }
+
+          // Check if board is locked
+          if (isBoardLocked) {
+            console.log('Board is locked');
+            return;
+          }
+
+          const cupsCount = cup.dataset.cups;
+          const currentSrc = cup.src;
+          const isEmpty = currentSrc.includes('empty');
+
+          if (!isEmpty) {
+            console.log('Cup already full');
+            return;
+          }
+
+          console.log('✓ Cup clicked directly: ' + cupsCount + ' cups');
+
+          // ===== TRIGGER SAME LOGIC AS CUP DRAG-AND-DROP =====
+          // Move all board items to cup (same as if user dragged chopped items)
+          Array.from(boardItems.entries()).forEach(([foodKey, boardItemData]) => {
+            const boardItem = boardItemData.element;
+            
+            // Record the fed material (same as handleChoppedItemPointerUp does)
+            if (!fedMaterials.includes(foodKey)) {
+              fedMaterials.push(foodKey);
+            }
+
+            // Remove from board
+            boardItem.remove();
+            boardItems.delete(foodKey);
+          });
+
+          // Update cup to full (same as cup drag logic)
+          cup.src = '/modules/custom/wormchat/images/' + cupsCount + 'cups_full.png';
+          
+          // Update selected cup
+          if (selectedCup.id === null) {
+            isBoardLocked = true;
+          }
+          selectedCup = { id: cup.dataset.cupId, size: cupsCount, element: cup };
+
+          console.log('✓ Fed materials recorded: ' + fedMaterials.join(', '));
+          console.log('✓ Board emptied - ready for next feeding');
+        });
+      });
+    }
+
+    // ===== INITIALIZE CUP CLICK HANDLERS =====
+    setupCupClickHandlers();
   }
 
 })(Drupal, jQuery, once);

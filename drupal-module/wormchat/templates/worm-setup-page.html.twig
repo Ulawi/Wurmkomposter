@@ -1,0 +1,246 @@
+<div class="worm-setup-container">
+  <div class="container py-5">
+    <h1 class="mb-4">{{ 'Wurm-Chat Setup'|t }}</h1>
+
+    {% if has_token %}
+      {# ===== DEVICE ALREADY CONFIGURED ===== #}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>✓</strong> {{ 'Dein Sensorkit ist eingerichtet und verbunden!'|t }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% else %}
+      {# ===== SETUP INSTRUCTIONS ===== #}
+      <div class="setup-instructions">
+        <h2 class="mb-3">{{ 'Flash! Richte dein Wurm-Sensor-Kit ein und verbinde es mit deinem Account'|t }}</h2>
+        <p class="lead mb-5">{{ 'Das Setup ist in wenigen Schritten gemacht. <br> Sollte ein Schritt nicht gleich klappen, haben wir unten ein paar FAQs und Tipps zusammengestellt.'|t }}</p>
+
+        {# ===== ALL SETUP STEPS ===== #}
+        <div class="setup-steps">
+          <div class="step-card step-1">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h3 class="step-title">{{ 'ANSCHLIESSEN'|t }}</h3>
+              <img src="{{ base_path }}modules/custom/wormchat/assets/setup/connect_usb.jpg" alt="Connect XIAO to PC with USB Cable" class="step-image img-fluid mb-3">
+              <ul class="step-list">
+                <li>{{ 'Verbinde das vollständig zusammengesteckte Wurm-Sensor-Kit mit dem USB-Kabel mit deinem Computer.'|t }}</li>
+                <li>{{ 'Es wird als USB-Gerät erkannt und kann jetzt eingerichtet werden.'|t }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step-card step-2">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h3 class="step-title">{{ 'SOFTWARE LADEN'|t }}</h3>
+              <div id="esp-flash-container" class="esp-web-tools-container-inline mb-3">
+                <script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js"></script>
+                <esp-web-install-button manifest="{{ base_path }}modules/custom/wormchat/assets/esp-manifest/manifest.json">
+                  <button slot="activate">{{ 'Software laden!'|t }}</button>
+                </esp-web-install-button>
+              </div>
+              <ul class="step-list">
+                <li>{{ 'Klicke auf den "Software laden!"-Button.'|t }}</li>
+                <li>{{ 'Jetzt geht ein Pop-Up-Fenster auf, wo du das Wurm-Sensor-Kit auswählen musst. Je nach dem, was du für einen Computer hast, hat es vielleicht einen etwas seltsamen Namen, wie z.B. "USB JTAG/serial debug unit".'|t }}</li>
+                <li>{{ 'Bestätige, dass alle alte Software vom Wurm-Sensor-Kit gelöscht und die neue Software auf das Wurm-Sensor-Kit geladen werden soll. Das kann 2-3 Minuten dauern.'|t }}</li>
+                <li>{{ 'Wenn du die Meldung 🎉 Installation complete! siehst, hat alles gut geklappt.'|t }}</li>
+                <li>{{ 'Schließe das Pop-Up-Fenster und fahre mit dem nächsten Schritt fort. Wenn du magst, kannst du statt dessen Logs & Console wählen. Dann öffnet sich ein Fenster, auf dem du mitlesen kannst, was im Hintergrund passiert.'|t }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step-card step-3">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h3 class="step-title">{{ 'WLAN FINDEN'|t }}</h3>
+              <img src="{{ base_path }}modules/custom/wormchat/assets/setup/AP_WURM_setup.jpg" alt="WiFi access point" class="step-image img-fluid mb-3">
+              <ul class="step-list">
+                <li>{{ 'Jetzt müssen wir auf dem Wurm-Sensor-Kit das WLAN einrichten.'|t }}</li>
+                <li>{{ 'Dafür hat das Wurm-Sensor-Kit einen WLAN Access Point aufgemacht.'|t }}</li>
+                <li>{{ 'Suche mit deinem Handy nach dem WLAN "WURM-Setup" und verbinde dich damit.'|t }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step-card step-4">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <h3 class="step-title">{{ 'WLAN PASSWORT EINGEBEN'|t }}</h3>
+              <img src="{{ base_path }}modules/custom/wormchat/assets/setup/WIFI_Manager.png" alt="WiFi Configuration" class="step-image img-fluid mb-3">
+              <ul class="step-list">
+                <li>{{ 'Du solltest jetzt auf dem Handy eine WiFi-Manager-Seite sehen. Falls du sie nicht gleich siehst, gehe auf das Zahnrad neben dem WLAN und dann auf "Verwalten des Routers".'|t }}</li>
+                <li>{{ 'Wähle den obersten Button "Configure WiFi".'|t }}</li>
+                <li>{{ 'Wähle dein WLAN aus der Liste und gib dein Passwort ein.'|t }}</li>
+                <li>{{ 'Gib deine E-Mail-Adresse ein (dieselbe wie hier auf dieser Seite).'|t }}</li>
+                <li>{{ 'Speichern mit "Save". Das Wurm-Sensor-Kit verbindet sich jetzt automatisch mit deinem Account.'|t }}</li>
+                <li>{{ 'Es merkt sich dein WLAN Passwort und verbindet sich ab sofort automatisch.'|t }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step-card step-5">
+            <div class="step-number">5</div>
+            <div class="step-content">
+              <h3 class="step-title">{{ 'SENSOR KALIBRIEREN'|t }}</h3>
+              <img src="{{ base_path }}modules/custom/wormchat/assets/setup/bf_sensor_calibration.png" alt="Calibration" class="step-image img-fluid mb-3">
+              <ul class="step-list">
+                <li>{{ 'Bevor du das Kit in den Komposter einbauen kannst, kalibrieren wir den Bodenfeuchtesensor.'|t }}</li>
+                <li>{{ 'Dafür brauchen wir die Messwerte für komplett trocken und komplett nass.'|t }}</li>
+                <li>{{ 'Trocken haben wir jetzt.'|t }}</li>
+                <li>{{ 'Stecke den Bodenfeuchtesensor in einen Becher mit Wasser bis kurz vor die weiße Linie. NICHT tiefer eintauchen! Der obere Teil darf nicht nass werden!'|t }}</li>
+                <li>{{ 'Lasse den Sensor etwa 15 Sekunden im Wasser.'|t }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="step-card step-6">
+            <div class="step-number">6</div>
+            <div class="step-content">
+              <h3 class="step-title">{{ 'FERTIG'|t }}</h3>
+              <img src="{{ base_path }}modules/custom/wormchat/assets/setup/well_done.png" alt="Ready to Deploy" class="step-image img-fluid mb-3">
+              <ul class="step-list">
+                <li>{{ 'Jetzt ist alles fertig eingerichtet.'|t }}</li>
+                <li>{{ 'Du kannst das Wurm-Sensor-Kit jetzt in deinen Komposter einbauen.'|t }}</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {# ===== STATUS MESSAGE AFTER FLASHING ===== #}
+        <div id="setup-status" class="setup-status alert alert-info mt-4">
+          <p id="status-message"></p>
+        </div>
+
+        {# ===== DONE BUTTON ===== #}
+        <div class="setup-done-section text-center my-5">
+          <a href="{{ base_path }}chat" class="btn btn-primary btn-lg">{{ 'Setup abgeschlossen - Los geht\'s!'|t }}</a>
+        </div>
+
+        {# ===== TROUBLESHOOTING SECTION ===== #}
+        <div class="troubleshooting-section mt-5">
+          <h2 class="mb-4">{{ 'Troubleshooting / Häufig gestellte Fragen'|t }}</h2>
+          
+          <div class="accordion" id="troubleshootingAccordion">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="false" aria-controls="faq1">
+                  {{ 'Das Sensorkit wird vom Computer nicht erkannt'|t }}
+                </button>
+              </h2>
+              <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                <div class="accordion-body">
+                  {{ 'Das kann am USB-Kabel liegen. Es gibt USB-Ladekabel, die können nur Strom, aber keine Daten übertragen.<br>Versuche es mit einem anderen USB-Kabel, das auch Daten überträgt.'|t }}
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" aria-expanded="false" aria-controls="faq2">
+                  {{ 'Ich kann das Wurm-Sensor-Kit nicht im Pop-Up finden'|t }}
+                </button>
+              </h2>
+              <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                <div class="accordion-body">
+                  {{ 'Vielleicht fehlt dir ein Treiber. Wähle abbrechen. Dann geht ein weiteres Pop-Up auf, mit Link zu dem Triber zum Downloaden. Du brauchst den ersten in der Liste, CP2102 (CP210X)'|t }}
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" aria-expanded="false" aria-controls="faq3">
+                  {{ 'Welchen Treiber brauche ich für das Wurm-Sensor-Kit?'|t }}
+                </button>
+              </h2>
+              <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                <div class="accordion-body">
+                  {{ 'Das Wurm-Sensor-Kit läuft auf einem ESP32-C3. Um es mit dem PC zu verbinden, brauchst du einen CP2102 (CP210X) Treiber.'|t }}
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" aria-expanded="false" aria-controls="faq4">
+                  {{ 'Ich kann den "WURM-Setup" Accesspoint nicht finden'|t }}
+                </button>
+              </h2>
+              <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                <div class="accordion-body">
+                  {{ 'Überprüfe, dass dein Handy WLAN aktiviert hat.<br>Der Accesspoint sieht aus wie ein ganz normales WLAN. Er sollte innerhalb von 30 Sekunden nach dem Flashen verfügbar sein.<br>Er heißt WURM-Setup. <br> Manchmal hilft auch ein Neustart des Kits. Drücke dazu den winzigen Knopf auf dem XIAO, neben dem ein R aufgedruckt ist.'|t }}
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5" aria-expanded="false" aria-controls="faq5">
+                  {{ 'Ich sehe die Warnung "ohne Internet verbunden".'|t }}
+                </button>
+              </h2>
+              <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                <div class="accordion-body">
+                  {{ 'Das ist ok, wähle die Option "dieses mal verbinden". Dann tippe auf das Zahnrad neben dem WLAN um die Details zu der Verbindung zu sehen. Dort gehst du auf "Router XXX" und landest so beim WiFiManager. Dort machst du weiter mit Schritt 4.'|t }}
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6" aria-expanded="false" aria-controls="faq6">
+                  {{ 'Das Flashing war nicht erfolgreich'|t }}
+                </button>
+              </h2>
+              <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                <div class="accordion-body">
+                  {{ 'Versuche ein anderes USB-Kabel zu benutzen.<br>Stelle sicher, dass dein Computer das Wurm-Sensor-Kit als Hardware erkennt, so wie einen USB-Stick.<br>Aktualisiere deinen Browser und versuche es erneut.'|t }}
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq7" aria-expanded="false" aria-controls="faq7">
+                  {{ 'Sensor-Kit verbindet sich nicht mit meinem WLAN'|t }}
+                </button>
+              </h2>
+              <div id="faq7" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                <div class="accordion-body">
+                  {{ 'Überprüfe, dass du das richtige WLAN-Passwort eingegeben hast.<br>Versuche den Sensor neu zu starten. Drücke dazu einfach den winzigen Reset (R) Knopf.'|t }}
+                </div>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq8" aria-expanded="false" aria-controls="faq8">
+                  {{ 'Noch immer Probleme?'|t }}
+                </button>
+              </h2>
+              <div id="faq8" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                <div class="accordion-body">
+                  {{ 'Kontaktiere uns für weitere Hilfe: <a href="mailto:wurmhilfe@ulawi.org">wurmhilfe@ulawi.org</a>'|t }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    {% endif %}
+
+    {# ===== IMAGE MODAL/LIGHTBOX ===== #}
+    <div id="image-modal" class="modal fade" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark">
+          <div class="modal-header border-0">
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-0">
+            <img class="image-modal-content w-100" src="" alt="">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,701 @@
+/**
+ * Setup page styling for device provisioning.
+ * Enhanced UX with better visual hierarchy and spacing.
+ */
+
+.worm-setup-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem 0;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  font-family: var(--wormchat-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  color: var(--wormchat-body-color, #212529);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.worm-setup-container h1 {
+  color: #1a5c3a;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+  text-align: center;
+}
+
+.worm-setup-container h1::before {
+  content: '🪱 ';
+  margin-right: 0.5rem;
+}
+
+.worm-setup-container h2 {
+  color: #1a5c3a;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  border-bottom: 3px solid var(--wormchat-primary-color, #1E4026);
+  padding-bottom: 0.75rem;
+}
+
+.alert {
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  border: 1px solid transparent;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.setup-instructions {
+  margin-top: 2.5rem;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.setup-instructions > p {
+  color: #555;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.setup-instructions h2 {
+  color: #1a5c3a;
+  font-size: 1.75rem;
+}
+
+.setup-instructions p {
+  margin-bottom: 1rem;
+  line-height: 1.8;
+  font-size: 1rem;
+  border-left: 3px solid var(--wormchat-primary-color, #1E4026);
+  padding-left: 1rem;
+  padding: 1rem;
+  padding-left: 1rem;
+  background-color: rgba(30, 64, 38, 0.02);
+  border-radius: 4px;
+}
+
+/* Add spacing after line breaks in paragraphs */
+.setup-instructions ol li p br {
+  content: "";
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.setup-instructions ol {
+  margin: 2rem 0;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: step-counter;
+  position: relative;
+}
+
+.setup-instructions ol::before {
+  content: '';
+  position: absolute;
+  left: 4rem;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--wormchat-primary-color, #1E4026) 0%, #22442a 100%);
+  border-radius: 2px;
+  opacity: 0.3;
+}
+
+.setup-instructions ol li {
+  margin-bottom: 3rem;
+  padding-left: 0;
+  position: relative;
+  line-height: 1.8;
+  font-size: 1.05rem;
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-left: none;
+  transition: all 0.3s ease;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.setup-instructions ol li:hover {
+  box-shadow: 0 8px 20px rgba(30, 64, 38, 0.2);
+  transform: translateY(-2px);
+}
+
+.setup-instructions ol li::before {
+  content: counter(step-counter);
+  counter-increment: step-counter;
+  grid-column: 1;
+  grid-row: 1;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--wormchat-primary-color, #1E4026), #22442a);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 2rem;
+  box-shadow: 0 4px 12px rgba(30, 64, 38, 0.3);
+  z-index: 1;
+}
+
+/* Style headers in steps */
+.setup-instructions ol li h3 {
+  grid-column: 1 / 3;
+  grid-row: 1;
+  margin: 0;
+  padding-left: 100px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--wormchat-primary-color, #1E4026);
+  align-self: center;
+}
+
+.step-image {
+  grid-column: 1;
+  grid-row: 2;
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.setup-instructions ol li p {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 0;
+  padding-left: 0;
+}
+
+/* Alternating image positions */
+.setup-instructions ol li.step-image-left {
+  grid-template-columns: 250px 1fr;
+}
+
+.setup-instructions ol li.step-image-left .step-image {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.setup-instructions ol li.step-image-left p {
+  grid-column: 2;
+  grid-row: 2;
+  padding-left: 1.5rem;
+}
+
+.setup-instructions ol li.step-image-right {
+  grid-template-columns: 1fr 250px;
+}
+
+.setup-instructions ol li.step-image-right .step-image {
+  grid-column: 2;
+  grid-row: 2;
+  order: 2;
+}
+
+.setup-instructions ol li.step-image-right p {
+  grid-column: 1;
+  grid-row: 2;
+  padding-right: 1.5rem;
+}
+
+.setup-instructions ol li.step-with-button {
+  grid-template-columns: auto 1fr;
+}
+
+.setup-instructions ol li.step-with-button.step-image-right {
+  grid-template-columns: 1fr auto;
+}
+
+.esp-web-tools-container-inline {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px;
+  width: 250px;
+}
+
+.setup-instructions ol li.step-with-button.step-image-right .esp-web-tools-container-inline {
+  grid-column: 2;
+  order: 2;
+}
+
+.setup-instructions ol li.step-with-button p {
+  grid-column: 2;
+  grid-row: 2;
+  padding-left: 1.5rem;
+}
+
+.setup-instructions ol li.step-with-button.step-image-right p {
+  grid-column: 1;
+  grid-row: 2;
+  padding-left: 0;
+  padding-right: 1.5rem;
+}
+
+/* Style the ESP Web Tools button container */
+.esp-web-tools-container-inline {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 125px;
+  width: 250px;
+  background: white;
+  border: 4px solid #A68051;
+  border-radius: 16px;
+  padding: 1.5rem;
+  cursor: pointer;
+}
+
+.setup-instructions ol li.step-with-button.step-image-right .esp-web-tools-container-inline {
+  grid-column: 2;
+  order: 2;
+}
+
+/* Style the ESP Web Tools button - simple and direct */
+esp-web-install-button {
+  --button-background: #A68051 !important;
+  --button-color: white !important;
+  --button-padding: 1.25rem 2rem !important;
+  --button-border-radius: 8px !important;
+  --button-font-size: 1.1rem !important;
+  --button-font-weight: 700 !important;
+  display: block !important;
+  width: 100% !important;
+  cursor: pointer !important;
+}
+
+/* Fallback: style the button element if accessible */
+esp-web-install-button button {
+  background: #A68051 !important;
+  color: white !important;
+  border: none !important;
+  padding: 1rem 2rem !important;
+  font-size: 1.1rem !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(166, 128, 81, 0.3) !important;
+}
+
+esp-web-install-button button:hover {
+  background: #8B6F47 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(166, 128, 81, 0.4) !important;
+}
+
+.setup-instructions ol li:last-child::after {
+  content: '';
+  display: none;
+}
+
+.esp-web-tools-container {
+  margin: 2.5rem 0;
+  padding: 2.5rem;
+  background: linear-gradient(135deg, rgba(12, 58, 95, 0.05) 0%, rgba(12, 58, 95, 0.02) 100%);
+  border: 2px solid var(--wormchat-primary-color, #1E4026);
+  border-radius: 8px;
+  text-align: center;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.setup-status {
+  display: none;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.setup-status.success {
+  display: block;
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.setup-status.error {
+  display: block;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* ===== TROUBLESHOOTING SECTION ===== */
+.troubleshooting-section {
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 3rem;
+}
+
+.troubleshooting-section h2 {
+  color: var(--wormchat-primary-color, #0c3a5f);
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+  border-bottom: 3px solid var(--wormchat-primary-color, #0c3a5f);
+  padding-bottom: 0.75rem;
+}
+
+.troubleshooting-section h2::before {
+  content: '❓ ';
+  margin-right: 0.5rem;
+}
+
+.troubleshoot-item {
+  margin-bottom: 1.2rem;
+}
+
+.troubleshoot-item summary {
+  cursor: pointer;
+  padding: 1.2rem 1.5rem;
+  background: linear-gradient(135deg, #f5f7fa 0%, #f0f2f5 100%);
+  border: 2px solid var(--wormchat-border-color, #dee2e6);
+  border-radius: 6px;
+  font-weight: 600;
+  color: #1a5c3a;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  font-size: 1.05rem;
+}
+
+.troubleshoot-item summary:hover {
+  background: linear-gradient(135deg, #eff1f5 0%, #ebeef2 100%);
+  border-color: var(--wormchat-primary-color, #1E4026);
+  box-shadow: 0 4px 12px rgba(12, 58, 95, 0.15);
+  transform: translateY(-2px);
+}
+
+.troubleshoot-item summary::after {
+  content: '+';
+  font-size: 1.8rem;
+  font-weight: 300;
+  min-width: 2rem;
+  text-align: right;
+}
+
+.troubleshoot-item[open] summary::after {
+  content: '−';
+}
+
+.troubleshoot-item[open] summary {
+  background: linear-gradient(135deg, #e8f4f8 0%, #e0edf2 100%);
+  border-color: var(--wormchat-primary-color, #1E4026);
+  box-shadow: 0 4px 12px rgba(12, 58, 95, 0.15);
+}
+
+.troubleshoot-answer {
+  padding: 1.5rem;
+  background-color: rgba(12, 58, 95, 0.03);
+  border: 2px solid var(--wormchat-border-color, #dee2e6);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  line-height: 1.6;
+}
+
+.troubleshoot-answer p {
+  margin: 0;
+  line-height: 1.8;
+  color: #555;
+}
+
+/* ===== DONE BUTTON ===== */
+.setup-done-section {
+  margin-top: 3.5rem;
+  padding-top: 2rem;
+  text-align: center;
+  border-top: 3px dashed var(--wormchat-border-color, #dee2e6);
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+  letter-spacing: 0.5px;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--wormchat-primary-color, #0c3a5f) 0%, #1a5a8f 100%);
+  color: white;
+  box-shadow: 0 6px 20px rgba(12, 58, 95, 0.4);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #092a47 0%, #0d3d5a 100%);
+  box-shadow: 0 10px 30px rgba(12, 58, 95, 0.5);
+  transform: translateY(-4px);
+}
+
+.btn-primary:active {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(12, 58, 95, 0.4);
+}
+
+.btn-lg {
+  padding: 1.25rem 2.5rem;
+  font-size: 1.2rem;
+}
+
+/* Remove numbering from nested lists inside ordered list items */
+.setup-instructions ol li ul {
+  list-style-type: disc;
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.setup-instructions ol li ul li {
+  list-style-type: disc;
+  display: list-item;
+  margin-bottom: 0.5rem;
+  padding-left: 0;
+  grid-column: auto;
+  grid-row: auto;
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+  width: auto;
+  font-size: 1rem;
+}
+
+.setup-instructions ol li ul li::before {
+  content: none;
+  display: none;
+}
+
+/* Setup Steps */
+.setup-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin: 3rem 0;
+}
+
+.step-card {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 2rem;
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 5px solid #1a5c3a;
+  transition: all 0.3s ease;
+}
+
+.step-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #1a5c3a 0%, #2a8c5a 100%);
+  color: white;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.step-title {
+  color: #1a5c3a;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.step-image {
+  max-width: 400px;
+  max-height: 300px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.step-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Image Modal */
+.modal-content {
+  border: none;
+}
+
+.image-modal-content {
+  max-width: 100%;
+  max-height: 80vh;
+  object-fit: contain;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .worm-setup-container {
+    padding: 1rem;
+    margin: 1rem;
+  }
+
+  .setup-instructions {
+    padding: 1rem;
+  }
+
+  .esp-web-tools-container {
+    padding: 1rem;
+  }
+
+  .setup-instructions ol li {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .step-image {
+    grid-column: 1;
+    height: 200px;
+  }
+
+  .setup-instructions ol li p {
+    grid-column: 1;
+  }
+
+  .setup-instructions ol::before {
+    left: 1.5rem;
+  }
+
+  .worm-setup-container h1 {
+    font-size: 1.8rem;
+  }
+
+  .btn-lg {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  .step-card {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .step-number {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  .step-title {
+    font-size: 1.2rem;
+  }
+
+  .step-image {
+    max-width: 100%;
+  }
+
+  .setup-instructions > p {
+    font-size: 1rem;
+  }
+
+  .setup-done-section .btn {
+    width: 100%;
+  }
+
+  .worm-setup-container h1 {
+    font-size: 1.8rem;
+  }
+
+  .setup-instructions h2 {
+    font-size: 1.4rem;
+  }
+
+  .troubleshooting-section {
+    padding: 1rem;
+  }
+
+  .accordion-button {
+    font-size: 0.95rem;
+    padding: 1rem 1.2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .step-card {
+    padding: 1rem;
+  }
+
+  .step-number {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+
+  .step-content {
+    gap: 1rem;
+  }
+
+  .worm-setup-container {
+    padding: 1rem 0;
+  }
+}
+
