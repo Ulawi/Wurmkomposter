@@ -221,15 +221,15 @@ Für den Rest dieser Anleitung gehen wir davon aus, dass du dir einen Thingsboar
 
 2. Regelketten anpassen:
    - Lade dir diese Regelkette (rule chain) herunter und importiere sie in dein Thingsboard:
-     [Url]([https://github.com/Ulawi/Wurmkomposter/blob/main/thingsboard/worms_root_rule_chain.json])
+     [Url](https://github.com/Ulawi/Wurmkomposter/blob/main/thingsboard/worms_root_rule_chain.json)
      Mache sie zur neuen root rule chain, in dem du in der Liste auf das kleine Fähnchen klickst.
 
      <img width="80%"  alt="Thingsboard UI rule chain Liste" src="https://github.com/user-attachments/assets/dc506d92-cc4e-4d7c-a904-d3b8660b736d" />
   
   - Lade auch noch die Regelketten für die Verarbeitung der Daten herunter und importiere sie in dein Thingsboard:
-  - [Url](https://github.com/Ulawi/Wurmkomposter/blob/main/thingsboard/evaluate_worm_condition.json)
-  - [Url](https://github.com/Ulawi/Wurmkomposter/blob/main/thingsboard/15m_cn_from_feeding_aggregator.json)
-  - Nach dem Import musst du sie mit der root Kette verknüpfen. Dafür klickst du in der root Regelkette auf den jeweiligen lila Block "rule chain Evaluate worm condition" sowie "Calculate c/n) und editierst ihn (durch klick auf das kleine rote Stiftsymbol). Wähle aus der Dropdownliste für die Regelkette (rule chain) die      passenden Ketten aus "Evaluate wurm condition" und "15m cn from feeding". 
+  - [Evaluate worm condition](https://github.com/Ulawi/Wurmkomposter/blob/main/thingsboard/evaluate_worm_condition.json)
+  - [c/n from feeding](https://github.com/Ulawi/Wurmkomposter/blob/main/thingsboard/15m_cn_from_feeding_aggregator.json)
+  - Nach dem Import musst du sie mit der root Kette verknüpfen. Dafür klickst du in der root Regelkette auf den jeweiligen lila Block "rule chain Evaluate worm condition" sowie "Calculate c/n" und editierst ihn (durch klick auf das kleine rote Stiftsymbol). Wähle aus der Dropdownliste für die Regelkette (rule chain) die      passenden Ketten aus "Evaluate wurm condition" und "15m cn from feeding". 
 
   
 4. Dashboard erstellen:
