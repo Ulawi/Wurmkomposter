@@ -195,7 +195,7 @@ Bevor du den Code auf den XIAO hochladen kannst, muss deine Arduino IDE richtig 
 
 Thingsboard ist unsere Datenverwaltungsplattform. Hier registrieren wir unser Gerät und erstellen Dashboards.
 Die Thingsboard Community Edition ist open source software und du kannst sie auf deinem lokalen Gerät installieren, einem PC oder einem Raspberry Pi, zum Beispiel. 
-Außerdem gibt es die Möglichkeit, die Thingsboard in der Cloud zu benutzen. Wir sind dabei, eine Ulawi-Thingsboard-Cloud aufzusetzen, auf der alle Wurmkomposter ihre Daten teilen und im Sinne einer Kreislaufwirtschaft den Wurmhumus umverteilen können.  
+Außerdem gibt es die Möglichkeit, die Thingsboard in der Cloud zu benutzen. Wir sind dabei, eine Ulawi-Thingsboard-Cloud aufzusetzen, auf der alle Wurmkomposter ihre Daten teilen und im Sinne einer Kreislaufwirtschaft den Wurmhumus umverteilen können.
 Aktuell musst du noch dein eignes Thingsboard konfigurieren. Entwerden in einer lokalen Installation, oder über eine Cloud Subscription z.B. bei thingsboard.cloud.
 
 Je nachdem, wofür du dich entscheidest, folge der Anleitung auf
@@ -219,8 +219,20 @@ Für den Rest dieser Anleitung gehen wir davon aus, dass du dir einen Thingsboar
 
   <img width="80%" alt="image" src="https://github.com/user-attachments/assets/3d98edce-5731-4bff-a228-bd7ce4c8a2c9" />
 
+2. Regelketten anpassen:
+   - Lade dir diese Regelkette (rule chain) herunter und importiere sie in dein Thingsboard:
+     [Url]([https://github.com/Ulawi/Wurmkomposter/blob/main/thingsboard/worms_root_rule_chain.json])
+     Mache sie zur neuen root rule chain, in dem du in der Liste auf das kleine Fähnchen klickst.
 
-2. Dashboard erstellen:
+     <img width="80%"  alt="Thingsboard UI rule chain Liste" src="https://github.com/user-attachments/assets/dc506d92-cc4e-4d7c-a904-d3b8660b736d" />
+  
+  - Lade auch noch die Regelketten für die Verarbeitung der Daten herunter und importiere sie in dein Thingsboard:
+  - [Url](https://github.com/Ulawi/Wurmkomposter/blob/main/thingsboard/evaluate_worm_condition.json)
+  - [Url](https://github.com/Ulawi/Wurmkomposter/blob/main/thingsboard/15m_cn_from_feeding_aggregator.json)
+  - Nach dem Import musst du sie mit der root Kette verknüpfen. Dafür klickst du in der root Regelkette auf den jeweiligen lila Block "rule chain Evaluate worm condition" sowie "Calculate c/n) und editierst ihn (durch klick auf das kleine rote Stiftsymbol). Wähle aus der Dropdownliste für die Regelkette (rule chain) die      passenden Ketten aus "Evaluate wurm condition" und "15m cn from feeding". 
+
+  
+4. Dashboard erstellen:
    - Lade dir unser Dashboard aus diesem Repo herunter:
    [Url]([https://github.com/Ulawi/Wurmkomposter/blob/main/evaluate_worm_condition.json])
    - Öffne die json Datei und ändere sie so ab, dass sie für dein neu erstelltes Device funktioniert:
