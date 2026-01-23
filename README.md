@@ -156,7 +156,7 @@ Dieser Schritt erklärt, wie die Sensoren mit dem XIAO verbunden werden. Da wir 
 
 
 
-Super, nun ist die Hardware zusammengebaut. Jetzt müsst ihr die Sprfware auf den Microcontroller spielen. 
+Super, nun ist die Hardware zusammengebaut. Jetzt müsst ihr die Software auf den Microcontroller spielen. 
 
 ### Schritt 2: Vorbereitung der Software (Arduino IDE)
 
