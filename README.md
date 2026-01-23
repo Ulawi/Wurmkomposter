@@ -67,7 +67,7 @@ Hier ist eine Liste aller Teile, die du für dieses Projekt benötigst. Wir habe
   
   Mit diesem Sensor können verschiedene Gase gemessen werden, u.a. Methan ( [Datenblatt](https://www.olimex.com/Products/Components/Sensors/Gas/SNS-MQ2/resources/MQ2.pdf) ).
   
-- 1x Lichtsensor https://wiki.seeedstudio.com/Grove-Light_Sensor/#upgradable-to-industrial-sensors
+- 1x Lichtsensor https://wiki.seeedstudio.com/Grove-Light_Sensor/
 - 1x USB-C Kabel zum Anschluss des XIAO an den PC während des Aufbaus
 - 1x USB-C Ladegerät für die Stromversorgung
 - Ein Gehäuse, das den XIAO vor Schmutz und Feuchtigkeit schützt. Falls du den Wurmkomposter nur in Innenräumen benutzt, kannst du als Gehäuse auch etwas verwenden oder upcyclen, was du zur Hand hast. Wir haben hier eine Installationsdose verwendet.
