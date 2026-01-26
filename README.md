@@ -253,6 +253,7 @@ Nun brauchen wir noch den Code, der die Sensordaten ausliest und an Thingsboard 
 
 3. Hochladen auf den XIAO:
    - Verbinde jetzt den XIAO mit deinem Computer über das USB-C-Kabel.
+   - Falls der XIAO ganz neu ist, kann es sein, dass du ihn erst in Boot mode verstzten musst. Dazu gehst du so vor: Halte den Boot-Knopf gedrückt und drücke jetzt gleichzeitig einmal kurz den Reset-Knopf. Dann erst lässt du auch Boot wieder los. 
    - Wähle in der Arduino IDE unter Werkzeuge > Board dein "XIAO_ESP32C3" Board aus.
    - Wähle unter Werkzeuge > Port den korrekten COM-Port deines XIAO aus.
    - Klicke auf den Hochladen-Button (Pfeil nach rechts).
